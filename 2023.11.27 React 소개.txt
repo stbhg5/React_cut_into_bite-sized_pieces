@@ -1,0 +1,20 @@
+[2023.11.27 React 소개]
+
+(섹션 0. 들어가며)
+
+1. 도대체 React는 무엇일까
+React는 자바스크립트의 UI 라이브러리
+지금은 Meta가 된 Facebook이 개발한 오픈소스
+
+2. React를 얼마나 많이 사용할까?
+2020 JS FLAVOR 에 따르면, 2016 1위, 2017 1위, 2018 2위, 2019 1위, 2020 2위
+사용 기업 : 인스타그램, 페이스북, 넷플릭스, 디스코드, 트위치, 트위터, 티스토리, 라프텔, 에어비앤비 등
+
+3. React를 배우면 뭘 만들 수 있나?
+React의 파생 기술은 React Native를 이용하여 데스크탑, Android, IOS에서 동작하는 어플리케이션을 개발할 수 있음
+
+4. React를 어떻게 배워야 하나?
+Javascript → Node.js(리액트 동작 환경) → React.js
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
