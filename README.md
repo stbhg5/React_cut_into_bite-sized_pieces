@@ -5,3 +5,7 @@
 <p>섹션 0. 들어가며<p/>
     <a href="https://stbhg5.tistory.com/294">React 소개</a><br/>
     <br/>
+
+<p>섹션 1. Javascript 기본<p/>
+    <a href="https://stbhg5.tistory.com/295">Hello World</a><br/>
+    <br/>
