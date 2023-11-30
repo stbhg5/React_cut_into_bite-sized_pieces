@@ -9,4 +9,5 @@
 <p>섹션 1. Javascript 기본<p/>
     <a href="https://stbhg5.tistory.com/295">Hello World</a><br/>
     <a href="https://stbhg5.tistory.com/296">변수와 상수</a><br/>
+    <a href="https://stbhg5.tistory.com/297">자료형과 형 변환</a><br/>
     <br/>
