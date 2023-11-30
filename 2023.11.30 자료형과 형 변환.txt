@@ -1,0 +1,66 @@
+[2023.11.30 자료형과 형 변환]
+
+1. 자료형
+자료형 : 값을 성질에 따라 분류한 것.
+
+* Data Types
+→ Primitive Data Type - Number, String, Boolean, Undefined, Null
+→ Non-Primitive Data Type - Object, Array, Function
+
+1) 자바스크립트의 자료형
+Primitive Type(원시타입) : 한 번에 하나의 값만 가질 수 있음. 하나의 고정된 저장 공간 이용. ex) let number = 12;
+Non-Primitive Type(비원시 타입) : 한 번에 여러 개의 값을 가질 수 있음. 여러 개의 고정되지 않은 동적 공간 사용. ex) let array = [1, 2, 3, 4];
+
+원시타입 자료형을 살펴본다.
+
+#1 숫자형
+let age = 25; // 정수
+let tall = 175.9; // 실수
+console.log(age + tall); // 200.9
+console.log(age * tall); // 4397.5
+let inf = Infinity; // 양의 무한대
+let minusInf = -Infinity; // 음의 무한대
+let nan = NaN; // 연산 잘못된 경우, 수학적 연산 실패 결과값
+
+#2 문자열
+let name = "winterlood";
+let name2 = '이정환';
+let name3 = `winterlood`; // 백틱
+console.log(name3); // winterlood
+// 백틱 : 문자열 안에 변수의 값을 넣을 수 있게 해주는 표현을 백틱을 사용하면 할 수 있다. '${}' 문법을 템플릿 리터럴이라 한다.
+let name4 = `winterlood ${name2}`; // winterlood 이정환
+
+#3 boolean형
+let isSwitchOff = true; // 참
+let isSwitchOff2 = false; // 거짓
+
+#4 null
+let a;
+console.log(a); // undefined
+let b = null; // 의도적으로 이 변수는 아무것도 안 담고 있다를 가리킬 때 사용
+
+#5 undefined
+let variable; // 값을 아무것도 할당하지 않았을 때, 이 변수는 자동으로 undefined 이라는 값을 할당받게 됨
+console.log(variable);
+
+2. 형 변환
+자바스크립트 엔진은 다른 자료형 간에 연산 수행 시 적절하게 자료형 자동으로 변환하여 결과 돌려주는 기능 갖고있다.
+값은 유지하며 문자열 2를 숫자 2로 자료형을 변환시키는 것을 캐스팅이라고 한다.
+
+1) 묵시적 형변환
+자동적으로 형변환이 일어남. 자바스크립트 엔진이 묵시적으로, 암묵적으로 알아서 해준다.
+
+let numberA = 12;
+let numberB = "2";
+console.log(numberA * numberB); // 숫자 24
+
+2) 명시적 형변환
+프로그래머가 의도적으로 형변환을 함.
+
+let numberA = 12;
+let numberB = "2";
+console.log(numberA + numberB); // 문자 122
+console.log(numberA + parseInt(numberB)); // 14
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
