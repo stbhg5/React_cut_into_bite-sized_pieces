@@ -1,0 +1,40 @@
+[2023.11.28 Hello World]
+
+(섹션 1. Javascript 기본)
+
+자바스크립트 안녕!
+
+1. 자바스크립트 언어 소개
+1) 자바스크립트는 무엇일까?
+프로그래머들이 가장 많이 사용하는 언어 1위! 2021년도, 영어권 최대 프로그래밍 Q&A 사이트 Stackoverflow의 조사 결과 - 자바스크립트 64.96%
+웹사이트는 HTML, CSS, Javascript 3가지 언어로 만들어짐
+HTML5 : 요소들의 배치와 내용을 기술하는 언어, 색이나 크기 등의 디자인 수행X
+CSS : 색, 크기, 애니메이션 등을 정의하는 스타일링을 위한 언어
+Javascript : 웹사이트의 활력을 부여하는 언어 (웹을 움직이는 근육)
+
+2) 자바스크립트가 실행되는 곳
+자바스크립트 엔진이 실행. 웹 브라우저에 포함되어 있음. (Safari - Apple, Firefox - Mozilla, Chrome - Google, Edge - Microsoft, Opera - Opera Software)
+V8 엔진 : 나중에 아주 큰일내는 구글 크롬의 자바스크립트 엔진.
+자바스크립트 엔진을 포함한 웹 브라우저는 자바스크립트가 실행될 수 있는 환경 : Runtime
+
+2. 웹 브라우저를 통한 자바스크립트 사용
+인터넷 브라우저는 사용금지. 정상지원 중단된지 시간이 좀 지났기 때문. 크롬 개발자 도구 (크롬 실행 후 F12 버튼 누르기) 사용.
+콘솔탭 파란색 커서 : 프롬프트
+
+console.log("안녕 자바스크립트");
+
+콘솔에 그대로 '안녕 자바스크립트' 출력됨. console.log 명령어를 웹 브라우저의 자바스크립트 엔진이 해석해서 실행한 것 확인.
+
+let a = 1;
+console.log(a);
+
+하지만, Enter 칠 때마다 바로바로 실행되는 단점이 있음.
+
+3. 온라인 웹 에디터 CodeSandbox를 통한 자바스크립트 사용
+자바스크립트의 Vanilla 템플릿을 사용. 하지만 CodeSandbox가 바뀌어서, Create a Sandbox - Vanilla Typescript 로 샌드박스 생성 후 파일을 .js로 수정하여 사용.
+
+- index.js
+console.log("hello");
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
