@@ -1,0 +1,122 @@
+[2023.12.02 연산자]
+
+1. 대입연산자
+변수에 값을 넣는 역할을 한다.
+
+let a = 1;
+
+2. 산술연산자
+사칙연산을 할 수 있도록 한다.
+
+let a = 1;
+let b = 2;
+console.log(a + b); // 3
+console.log(a - b); // -1
+console.log(a * b); // 2
+console.log(a / b); // 0.5
+console.log(a % b); // 1
+
+3. 연결연산자
+2개 이상의 문자열을 이어붙이는 연산.
+문자형과 숫자형을 더하면 묵시적 형변환이 일어나, 숫자형이 문자형으로 변환된다.
+
+let a = "1";
+let b = "2";
+console.log(a + b); // 12
+let a = "1";
+let b = 2;
+console.log(a + b); // 12
+
+4. 복합연산자
+산술연산자와 대입연산자를 함께 활용한 구조.
+
+let = 5;
+// a = a + 10;
+a += 10;
+console.log(a); // 15
+a -=10;
+console.log(a); // -5
+a *= 10;
+console.log(a); // 50
+a /= 10
+console.log(a); // 0.5
+
+5. 증감연산자
+값을 증가시키거나 감소시킬 때 사용. 원시타입 중 숫자형에만 사용 가능.
+
+// 후위연산 : 한라인이 끝나고 나서 연산이 적용되어 값 변경
+let a = 10;
+console.log(a++); // 10
+let a = 10;
+console.log(a--); // 10
+
+// 전위연산 : 현재 라인에서 바로 연산이 적용되어 값 변경
+let a = 10;
+console.log(++a); // 11
+let a = 10;
+console.log(--a); // 9
+
+6. 논리연산자
+boolean 자료형을 위한 연산자로, 조건문에서 유용하게 사용된다.
+
+// ! : NOT
+console.log(!true); // false
+console.log(!false); // true
+
+// && : AND - 피연산자 둘 다 참일 경우에 참
+console.log(true && true); // true AND true // true
+console.log(true && false); // false
+
+// || : OR - 피연산자 중 하나만 참이어도 참
+console.log(true || false); // true
+console.log(false || true); // true
+console.log(false || false); // false
+
+7. 비교연산자
+2개의 값을 비교한다. 5가지의 비교연산자가 있다.
+
+// ==, != : 값만 비교
+let compareA = 1 == "1";
+console.log(compareA); // true
+let compareB = 1 != "1";
+console.log(compareB); // false
+
+// ===, !== : 값 + 자료형 비교
+let compareA = 1 === "1";
+console.log(compareA); // false
+let compareB = 1 !== "1";
+console.log(compareB); // true
+
+// >
+let compareA = 1 > 2;
+console.log(compareA); // false
+
+// <
+let compareA = 1 < 2;
+console.log(compareA); // true
+
+// >=
+let compareA = 1 >= 2;
+console.log(compareA); // false
+
+// <=
+let compareA = 1 <= 2;
+console.log(compareA); // true
+
+8. 타입확인 연산자
+해당 변수의 자료형이 무엇인지 결과를 문자열로 돌려준다.
+
+let compareA = 1;
+console.log(typeof compareA); // number
+compareA = "1";
+console.log(typeof compareA); // string
+
+9. null병합 연산자
+양쪽의 피연산자 중 null이나 undefined가 아닌 값을 선택하여 값 할당.
+
+let a; // undefined
+a = a ?? 10;
+console.log(a); // 10
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
