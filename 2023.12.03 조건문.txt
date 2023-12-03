@@ -1,0 +1,66 @@
+[2023.12.03 조건문]
+
+조건문 : 어떤 연산 결과의 참, 거짓에 따라 각각 다른 명령을 실행하도록 해주는 문법.
+
+1. if문
+if 조건식이 일치하면 해당 명령 실행.
+else if 조건식은 if의 조건식이 거짓일 때 비교하여, 일치하면 해당 명령 실행.
+else는 위 조건이 다 거짓일 때 실행.
+
+let a = 3;
+
+if (a >= 7) {
+    console.log("7 이상입니다.");
+} else if (a >= 5) {
+    console.log("5 이상입니다.");
+} else if (a >= 4) {
+    console.log("4 이상입니다.");
+} else {
+    console.log("4 미만입니다.");
+}
+
+2. switch문
+보통 조건이 많을 때 사용한다.
+
+// 국가코드 2자를 입력받아 국가명 반환
+
+// if문 예시
+let country = "ko";
+
+if (country === "ko") {
+    console.log("한국");
+} else if (country === "cn") {
+    console.log("중국");
+} else if (country === "jp") {
+    console.log("일본");
+} else {
+    console.log("미분류");
+}
+
+// switch문 예시
+let country = "ko";
+
+switch (country) {
+    case "ko":
+        console.log("한국");
+        break;
+    case "cn":
+        console.log("중국");
+        break;
+    case "jp":
+        console.log("일본");
+        break;
+    case "uk":
+        console.log("영국");
+        break;
+    default:
+        console.log("미분류");
+        break;
+}
+
+switch의 변수와 case 값을 비교하여 일치하는 case 실행.
+default는 위의 case 조건이 하나도 맞지 않을 때 실행.
+break는 해당 case문에서 적절히 끊어 다음 코드가 실행되지 않도록 한다.
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
