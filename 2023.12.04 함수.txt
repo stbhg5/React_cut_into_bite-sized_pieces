@@ -1,0 +1,76 @@
+[2023.12.04 함수]
+
+함수 : 중복되는 동일한 동작을 하는 코드를 하나로 묶어서 사용.
+
+// 2개의 직사각형의 면적을 계산하고, 계산 결과를 콘솔에 출력하는 프로그램
+let width1 = 10;
+let height1 = 20;
+let area1 = width1 * height1;
+console.log(area1); // 200
+
+let width2 = 30;
+let height2 = 15;
+let area2 = width2 * height2;
+console.log(area2); // 450
+
+위처럼 중복되는 코드들을 함수를 사용하면 효율적으로 줄일 수 있다.
+
+1. 함수 선언과 호출
+// 함수 선언식, 함수 선언 방식의 함수 생성
+function getArea() { // 함수가 할 일 명시
+    let width = 10;
+    let height = 20;
+    let area = width * height;
+    console.log(area); // 200
+}
+
+getArea(); // 함수 호출
+console.log("함수 실행 완료"); // 호출된 함수 실행 후 실행
+
+함수를 여러번 호출하면 호출한 만큼 실행된다.
+
+2. 함수의 매개변수
+// 10개의 직사각형 넓이 구하는 프로그램
+function getArea(width, height) { // width, height과 같이, 함수를 호출할 때 넘겨준 값들을 받는 변수를 매개변수라 한다.
+    let area = width * height;
+    console.log(area); // 20000
+}
+
+// 함수 호출
+getArea(1, 200);
+getArea(2, 200);
+getArea(3, 200);
+getArea(4, 200);
+getArea(5, 200);
+getArea(6, 200);
+getArea(7, 200);
+getArea(8, 200);
+getArea(9, 200);
+getArea(10, 200);
+
+3. 함수의 반환값
+// 함수의 결과값을 변수에 받기
+function getArea(width, height) {
+    let area = width * height;
+    return area; // 반환
+}
+
+let area1 = getArea(100, 200);
+console.log("area1 : ", area1);
+
+4. 지역변수와 전역변수
+// 함수 외부에 선언된 변수는 함수 내부에서 접근 가능
+let count = 1; // 전역변수(글로벌변수)
+
+// 함수 내에 선언된 변수는 외부에서 접근 불가능
+function getArea(width, height) {
+    let area = width * height; // 지역변수
+    console.log(count); // 1
+    return area;
+}
+
+let area1 = getArea(100, 200);
+console.log(area); // 오류발생 : area is not defined (정의되지 않았다는 오류)
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#

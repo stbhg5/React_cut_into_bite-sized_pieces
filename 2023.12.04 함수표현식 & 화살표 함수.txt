@@ -1,0 +1,49 @@
+[2023.12.04 함수표현식 & 화살표 함수]
+
+함수 : 비원시형 자료형(값의 분류), 값이기 때문에 변수나 상수에 담을 수 있음.
+
+1. 함수 표현식
+// 함수 표현식
+let hello = function () { // 함수를 값에 담을 때, 함수의 이름 지정하지 않아도 됨
+    return "안녕하세요 여러분";
+}
+
+console.log(hello); // f hello() {} : 함수를 담고 있다.
+                    // <constructor>: "Function"
+const helloTest = hello(); // 이렇게 함수 사용 가능
+console.log(helloTest); // 안녕하세요 여러분
+
+호이스팅 : 함수 선언식으로 선언된 함수는 프로그램 실행 전, 코드 최상단으로 끌어 올려진다.
+함수 선언식은 호이스팅O, 함수 표현식은 호이스팅X. 함수 표현식은 함수가 선언되기 전엔 접근할 수 없다.
+따라서 밑바닥에 함수를 박아놔야 한다면 함수 선언식을, 그럴 필요 없다면 함수 표현식 사용.
+
+// 함수 표현식과 함수 선언식의 차이 : 호이스팅
+// 함수 호출
+console.log(helloB()); // 호이스팅O - 안녕하세요 여러분
+console.log(helloA()); // 호이스팅X - 에러발생 : helloA is not a function
+
+// 함수 표현식
+let helloA = function () {
+    return "안녕하세요 여러분";
+}
+
+// 함수 선언식
+function helloB() {
+    return "안녕하세요 여러분";
+}
+
+2. 화살표 함수
+// 함수 표현식을 더 간략하게 사용하는 방법 : 화살표 함수
+let helloA = () => {
+    return "안녕하세요 여러분";
+}
+
+// 구현부가 하나만 리턴한다면
+let helloA = () => "안녕하세요 여러분";
+
+console.log(helloA()); // 안녕하세요 여러분
+
+화살표 함수 또한 호이스팅 대상이 아니므로, 순서 잘 지켜서 작성한다.
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
