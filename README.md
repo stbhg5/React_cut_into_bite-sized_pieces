@@ -12,4 +12,6 @@
     <a href="https://stbhg5.tistory.com/297">자료형과 형 변환</a><br/>
     <a href="https://stbhg5.tistory.com/298">연산자</a><br/>
     <a href="https://stbhg5.tistory.com/299">조건문</a><br/>
+    <a href="https://stbhg5.tistory.com/300">함수</a><br/>
+    <a href="https://stbhg5.tistory.com/301">함수표현식 & 화살표 함수</a><br/>
     <br/>
