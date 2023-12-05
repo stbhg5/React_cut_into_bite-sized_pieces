@@ -1,0 +1,33 @@
+[2023.12.05 콜백함수]
+
+콜백함수 : 함수의 매개변수로 함수를 넘겨준 것.
+
+// 기분에 따라서 다른 동작을 하는 함수
+function checkMood(mood, goodCallback, badCallback) { // 함수표현식 개념 이용하여 cry 함수를 badCallback 매개변수에 담음
+    if (mood === 'good') {
+        // 기분 좋을 때 하는 동작
+        goodCallback();
+    } else {
+        // 기분 안 좋을 때 하는 동작
+        badCallback();
+    }
+}
+
+function cry() {
+    console.log("ACTION :: CRY");
+}
+
+function sing() {
+    console.log("ACTION :: SING");
+}
+
+function dance() {
+    console.log("ACTION :: DANCE");
+}
+
+checkMood("sad", sing, cry); // 함수를 값에 담는 것 : 함수표현식
+
+콜백함수를 이용하면 여러가지 유용한 동작을 할 수 있는 함수 만들 수 있다.
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
