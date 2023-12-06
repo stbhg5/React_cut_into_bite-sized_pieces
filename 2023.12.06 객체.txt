@@ -1,0 +1,137 @@
+[2023.12.06 객체]
+
+자바스크립트의 자료형
+- Primitive Type (원시 타입) : 한 번에 하나의 값만 가질 수 있음. 하나의 고정된 저장 공간 이용.
+- Non-Primitive Type (비원시 타입) : 한 번에 여러 개의 값을 가질 수 있음. 여러 개의 고정되지 않은 동적 공간 사용.
+
+객체는 비원시 타입이다.
+
+1. 객체 생성
+// 객체 생성자를 이용한 방법
+let person = new Object();
+
+// 중괄호를 이용한 방법 : 객체 리터럴 방식
+let person = {};
+
+// 객체 프로퍼티
+let person = { // key - value 형태의 값 가짐. 여러개의 프로퍼티를 가질 수 있다. 각각 자료형이 달라도 된다.
+    key: "value" // 프로퍼티 (객체 프로퍼티) : 속성, 객체가 가지고 있는 데이터
+  , key1: 123
+  , key2: true
+  , key3: undefined
+  , key4: [1, 2]
+  , key5: function() {}
+};
+
+key는 반드시 문자열로 이루어져야 한다. "" 따옴표 생략 가능.
+key가 중복되도 문제가 발생하진 않지만, 가장 뒤에 있는 프로퍼티를 기준으로 키의 값을 가져오기 때문에 권장하지 않는다.
+
+2. 객체 프로퍼티 꺼내기
+키와 매칭하는 값을 가져온다.
+
+let person = {
+    name: "송진성"
+  , age: 30
+}
+
+// 점 표기법 : 객체명.프로퍼티명
+console.log(person.name); // 송진성
+console.log(person.age); // 30
+
+// 괄호 표기법 : 객체명["프로퍼티명"]
+console.log(person["name"]); // 송진성
+console.log(person["age"]); // 30
+// 곧 죽어도 괄호표기법에 변수형태로 넣고싶다면..
+let name = "name";
+console.log(person[name]); // 송진성
+
+* 주의
+괄호 표기법 사용시 괄호 안에 프로퍼티의 키를 문자열 형태로 넣어야 한다. 따옴표를 빼면 변수로 인식하기 때문이다.
+
+// 괄호 표기법 사용 예시 : 객체 프로퍼티의 키를 통해 값 받아오는 함수
+let person = {
+    name: "송진성"
+  , age: 30
+}
+
+// 호이스팅
+console.log(getPropertyValue("name")); // 송진성
+
+function getPropertyValue(key) {
+    return person[key];
+}
+
+괄호 표기법을 쓰기 좋은 상황 : 동적 파라미터를 전달받는 상황, key가 고정되어있지 않은 상황 등
+
+3. 객체 프로퍼티 추가, 수정, 삭제
+let person = {
+    name: "송진성"
+  , age: 25
+};
+
+// 추가
+person.location = "한국"; // 점 표기법
+person["gender"] = "남성"; // 괄호 표기법
+
+// 수정
+person.name = "송진성 A";
+person["age"] = 40;
+// 수정 참고사항 : 상수 객체
+const person = {
+    name: "송진성"
+  , age: 25
+}
+person.name = "송진성 A"; // 프로퍼티 수정 가능
+person = {
+    age: 20
+}; // 불가능 - 새로운 객체를 대입연산자를 통해 할당 안됨, 따라서 상수 자체에 대입연산자를 사용하지 않으면 됨
+
+// 삭제
+// 연결만 끊고, 메모리에서 지워지지 않음.
+delete person.name;
+delete person["age"];
+// 메모리에서 삭제
+person.name = null;
+
+4. 객체 프로퍼티에 선언된 함수인 메서드 사용
+let person = {
+    name: "송진성" // 멤버 : 객체 안에 함수가 아닌 것들
+  , age: 25 // 멤버
+  , say: function() { // 메서드 : 객체 안의 함수
+        console.log("안녕");
+    }
+};
+
+person.say(); // 안녕
+person["say"](); // 안녕
+
+5. this의 사용
+let person = {
+    name: "송진성"
+  , age: 25
+  , say: function() {
+        console.log(`안녕 나는 ${this.name}`);
+        // console.log(`안녕 나는 ${this["name"]}`);
+        // console.log(`안녕 나는 ${person.name}`);
+    }
+};
+
+person.say(); // 안녕 나는 송진성
+
+6. in 연산자의 사용
+in 연산자 : 객체 안에 프로퍼티 확인, 존재 유무에 따른 boolean 값 반환
+
+let person = {
+    name: "송진성"
+  , age: 25
+}
+
+// 객체에 존재하지 않는 프로퍼티에 접근
+console.log(person.gender); // undefined
+
+console.log(`gender : ${"gender" in person}`); // gender : false
+console.log(`name : ${"name" in person}`); // name : true
+console.log(`age : ${"age" in person}`); // age : true
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
