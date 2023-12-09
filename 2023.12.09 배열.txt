@@ -1,0 +1,51 @@
+[2023.12.09 배열]
+
+배열 : 순서있는 요소들의 집합. 여러개의 항목이 들어있는 List.
+배열은 비원시 타입이다.
+객체와 더불어 가장 많이 사용되는 자료형이다.
+
+1. 배열 객체 생성
+// 생성자를 이용한 방법
+let arr = new Array();
+
+// 대괄호를 이용한 방법 : 배열 리터럴 방식
+let arr = [];
+
+// 배열에 값 넣기
+let arr = [1, 2, 3, 4];
+console.log(arr); // [1, 2, 3, 4]
+
+// 배열에 값으로 여러 자료형이 들어갈 수 있다.
+let arr = [1, "2", true, null, undefined, {}, [], function() {}];
+
+2. 배열의 인덱스
+배열은 데이터가 위치한 순서(인덱스)를 통해 접근.
+
+// 배열의 인덱스
+let arr = [1, 2, 3, 4, 5];
+console.log(arr[0]); // 1
+console.log(arr[1]); // 2
+console.log(arr[2]); // 3
+console.log(arr[3]); // 4
+console.log(arr[4]); // 5
+console.log(arr[5]); // undefined
+
+3. 배열에 요소 추가
+push() : 배열의 가장 마지막에 원소 추가
+
+// push() 함수 
+let arr = [1, 2, 3, 4, 5];
+arr.push(6);
+arr.push({key: "value"});
+console.log(arr); // [1, 2, 3, 4, 5, 6, Object]
+
+4. 배열의 길이 확인
+배열도 객체로 이루어져 있다. List형 데이터도 담지만 유용한 프로퍼티나 함수를 객체처럼 저장했기 때문에, 객체 프로퍼티 접근법으로 상황에 맞게 사용할 수 있다.
+
+let arr = [1, 2, 3, 4, 5];
+console.log(arr.length); // 5
+arr.push(6);
+console.log(arr.length); // 6 - 배열이 바뀌면 자동으로 갱신됨
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
