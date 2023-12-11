@@ -1,0 +1,194 @@
+[2023.12.11 배열 내장 함수]
+
+1. forEach
+배열을 모든요소 1번씩 순회. 내장함수에 매개변수로 콜백함수를 전달.
+
+const arr = [1, 2, 3, 4];
+
+// for문을 통한 배열 순회
+for (let i = 0; i < arr.length; i++) {
+    console.log(arr[i]);
+}
+
+// forEach를 통한 배열 순회
+arr.forEach((elm) => console.log(elm)); // 화설표 함수로 응용
+arr.forEach(function (elm) {
+    console.log(elm);
+    console.log(elm * 2); // 각각의 요소에 응용가능
+});
+
+2. map
+원본배열의 모든 요소를 순회하며 연산하여 return 된 값들을 따로 배열로 만들어 반환.
+
+// 배열의 모든요소에 2를 곱하여 새로운 배열로 저장
+const arr = [1, 2, 3, 4];
+const newArr = [];
+
+arr.forEach(function (elm) {
+    newArr.push(elm * 2);
+});
+
+console.log(newArr); // [2, 4, 6, 8]
+
+// map 활용
+const newArr = arr.map((elm) => {
+    return elm * 2;
+});
+
+console.log(newArr); // [2, 4, 6, 8]
+
+3. includes
+주어진 배열에서 전달받은 인자와 일치하는 값이 존재하는지 확인하여 boolean 값으로 return. === 연산 사용.
+
+// 배열의 값 검사
+const arr = [1, 2, 3, 4];
+let number = 3;
+arr.forEach((elm) => {
+    if (elm === number) {
+        console.log(true); // true
+    }
+});
+
+// includes 사용
+console.log(arr.includes(number)); // true
+
+4. indexOf
+인자와 배열 안의 값을 비교하여 인덱스 반환.
+
+// 주어진 값이 배열에 존재하면 몇 번째 index인지 확인
+const arr = [1, 2, 3, 4];
+let number = "3";
+console.log(arr.indexOf(number)); // -1 : 주어진 값과 배열 안에 값이 일치하는 것이 하나도 없을 경우
+let number = 3;
+console.log(arr.indexOf(number)); // 2
+
+5. findIndex
+해당 요소의 값과 배열 안의 값(객체)을 비교하여 인덱스 반환. 콜백함수를 전달하여, 해당 콜백함수가 true를 반환하는 첫 번째 요소 반환.
+
+const arr = {
+    {color: "red"}
+  , {color: "black"}
+  , {color: "blue"}
+  , {color: "green"}
+  , {color: "blue"}
+};
+
+console.log(arr.findIndex((elm) => {elm.color === "green"})); // 3
+console.log(arr.findIndex((elm) => {elm.color === "red"})); // 0
+// 주의 - 가장 먼저 조건 만족하는 index 반환
+console.log(
+    arr.findIndex((elm) => {
+        return elm.color === "blue";
+    })
+); // 2
+
+6. find
+해당 요소의 값과 배열 안의 값(객체)을 비교하여 일치하는 요소 그대로 가져옴. 콜백함수를 전달하여, 해당 콜백함수가 true를 반환하는 첫 번째 요소 반환.
+
+const arr = {
+    {color: "red"}
+  , {color: "black"}
+  , {color: "blue"}
+  , {color: "green"}
+  , {color: "blue"}
+};
+
+const idx = arr.findIndex((elm) => {
+    return elm.color === "blue"
+});
+
+console.log(arr[idx]); // color: "blue"
+
+// find 활용
+const element = arr.find((elm) => {
+    return elm.color === "blue";
+});
+
+console.log(element); // color: "blue"
+
+7. filter
+배열 필터링. 배열에서 특정한 조건을 만족하는 요소들을 배열로 다시 반환(매개변수로 전달한 콜백함수가 true를 반환하는 모든 요소를 배열로 반환)
+
+const arr = {
+    {num: 1, color: "red"}
+  , {num: 2, color: "black"}
+  , {num: 3, color: "blue"}
+  , {num: 4, color: "green"}
+  , {num: 5, color: "blue"}
+};
+
+console.log(arr.filter((elm) => elm.color === "blue"));
+
+8. slice
+배열을 자름. 매개변수를 넣지 않으면 현재 배열 그대로 반환.
+slice(begin, end) : begin에서 end - 1까지 잘라서 배열로 반환.
+
+const arr = {
+    {num: 1, color: "red"}
+  , {num: 2, color: "black"}
+  , {num: 3, color: "blue"}
+  , {num: 4, color: "green"}
+  , {num: 5, color: "blue"}
+};
+
+console.log(arr.slice(0, 2)); // [Object, Object] - {num: 1, color: "red"}, {num: 2, color: "black"}
+
+9. concat
+2개의 배열 붙이기.
+배열1.concat(배열2) : 배열1 뒤로 배열2 붙여 하나의 배열로 반환.
+
+const arr1 = {
+    {num: 1, color: "red"}
+  , {num: 2, color: "black"}
+  , {num: 3, color: "blue"}
+};
+
+const arr2 = {
+    {num: 4, color: "green"}
+  , {num: 5, color: "blue"}
+};
+
+console.log(arr1.concat(arr2)); // [Object, Object, Object, Object, Object] - {num: 1, color: "red"}, {num: 2, color: "black"}, {num: 3, color: "blue"}, {num: 4, color: "green"}, {num: 5, color: "blue"}
+
+10. sort
+배열 사전 순(문자열 순)으로 정렬. 원본 배열을 정렬.
+
+let chars = ["나", "다", "가"];
+chars.sort();
+console.log(chars);
+
+let numbers = [0, 1, 3, 2, 10, 30, 20];
+numbers.sort();
+console.log(numbers); // [0, 1, 10, 2, 20, 3, 30] - 사전순 정렬
+
+// 비교함수를 통한 숫자 정렬
+let numbers = [0, 1, 3, 2, 10, 30, 20];
+const compare = (a, b) => {
+    // 1. 크다 - 뒤로 보냄
+    if (a > b) {
+        return 1; // -1 : 내림차순
+    }
+    // 2. 작다 - 앞으로 보냄
+    if (a < b) {
+        return -1; // 1 : 내림차순
+    }
+    // 3. 같다 - 자리 안 바꿈
+    return 0;
+};
+
+numbers.sort(compare);
+console.log(numbers); // [0, 1, 2, 3, 10, 20, 30] - 오름차순 정렬
+
+비교함수를 제작하여 sort() 메서드에 전달하면 정수배열 뿐만 아니라 객체배열, 배열들의 배열, 함수들의 배열 등도 원하는대로 정렬할 수 있다.
+
+11. join
+배열 내 모든 요소들을 문자열 형태로 합침. 매개변수를 전달하면 해당 값이 구분자가 됨. 매개변수가 없다면 ,가 구분자.
+
+const arr = ["송진성", "님", "안녕하세요", "또오셨군요"];
+
+console.log(arr.join()); // 송진성,님,안녕하세요,또오셨군요
+console.log(arr.join(" ")); // 송진성 님 안녕하세요 또오셨군요
+console.log(arr.join("===")); // 송진성===님===안녕하세요===또오셨군요
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
