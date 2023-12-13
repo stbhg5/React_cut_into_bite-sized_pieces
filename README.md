@@ -20,3 +20,7 @@
     <a href="https://stbhg5.tistory.com/305">반복문</a><br/>
     <a href="https://stbhg5.tistory.com/306">배열 내장 함수</a><br/>
     <br/>
+
+<p>섹션 2. Javascript 응용<p/>
+    <a href="https://stbhg5.tistory.com/307">Truthy & Falsy</a><br/>
+    <br/>
