@@ -24,4 +24,5 @@
 <p>섹션 2. Javascript 응용<p/>
     <a href="https://stbhg5.tistory.com/307">Truthy & Falsy</a><br/>
     <a href="https://stbhg5.tistory.com/308">삼항 연산자</a><br/>
+    <a href="https://stbhg5.tistory.com/309">단락회로 평가</a><br/>
     <br/>
