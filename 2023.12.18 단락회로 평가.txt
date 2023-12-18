@@ -1,0 +1,37 @@
+[2023.12.18 단락회로 평가]
+
+단락회로 평가 : 왼쪽에서 오른쪽으로 연산하게 되는 논리연산자의 연산 순서를 이용하는 문법으로, 뒤에 위치한 피연산자를 확인할 필요 없이 연산을 끝내는 것. (논리연산자의 특성을 이용한 문법)
+
+1. 논리연산자를 이용한 단락회로 평가
+console.log(false && true); // 앞에가 false면 뒤에는 볼 필요 없이 평가 종료
+
+console.log(true || false); // 앞에가 true면 뒤에는 볼 필요 없이 평가 종료
+
+console.log(!true);
+
+2. Truthy & Falsy 활용한 단락회로 평가
+// 단락회로 평가 사용 전
+const getName = (person) => {
+    if (!person) {
+        return "객체가 아닙니다.";
+    }
+    return person.name;
+};
+
+let person;
+const name = getName(person);
+console.log(name); // 객체가 아닙니다.
+
+// 단락회로 평가 사용 후
+const getName = (person) => {
+    const name = person && person.name;
+    return name || "객체가 아닙니다.";
+};
+
+let person;
+// let person = { name: "송진성" };
+const name = getName(person);
+console.log(name); // 객체가 아닙니다.
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
