@@ -1,0 +1,61 @@
+[2023.12.19 조건문 업그레이드]
+
+Upgrade If Condition
+
+1. 배열 활용한 조건문 업그레이드
+// 주어진 문자열이 한식인지 검사하는 함수
+// 논리표현식 사용
+function isKoreanFood(food) {
+    if (food === "불고기" || food === "비빔밥" || food === "떡볶이") {
+        return true;
+    }
+    return false;
+}
+
+// 배열 내장함수 includes 활용
+function isKoreanFood(food) {
+    if (["불고기", "떡볶이", "비빔밥"].includes(food)) {
+        return true;
+    }
+    return false;
+}
+
+const food1 = isKoreanFood("불고기");
+const food2 = isKoreanFood("파스타");
+console.log(food1); // true
+console.log(food2); // false
+
+2. 객체 활용한 조건문 업그레이드
+// 음식명을 받아 한식, 중식, 양식, 일식의 대표메뉴 return 하는 함수
+// 일반조건문 나열
+const getMeal = (mealType) => {
+    if (mealType === "한식") return "불고기";
+    if (mealType === "양식") return "파스타";
+    if (mealType === "중식") return "멘보샤";
+    if (mealType === "일식") return "초밥";
+    return "굶기";
+}
+
+console.log(getMeal("한식")); // 불고기
+console.log(getMeal("중식")); // 멘보샤
+console.log(getMeal()); // 굶기
+
+// 객체 활용
+// 음식 유형의 대표음식 한 가지 가지고 있는 객체
+const meal = {
+    한식: "불고기"
+  , 중식: "멘보샤"
+  , 일식: "초밥"
+  , 양식: "스테이크"
+  , 인도식: "카레"
+};
+
+const getMeal = (mealType) => {
+    return meal[mealType] || "굶기";
+};
+
+console.log(getMeal("중식")); // 멘보샤
+console.log(getMeal()); // 굶기
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
