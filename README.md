@@ -26,4 +26,5 @@
     <a href="https://stbhg5.tistory.com/308">삼항 연산자</a><br/>
     <a href="https://stbhg5.tistory.com/309">단락회로 평가</a><br/>
     <a href="https://stbhg5.tistory.com/310">조건문 업그레이드</a><br/>
+    <a href="https://stbhg5.tistory.com/311">비 구조화 할당</a><br/>
     <br/>
