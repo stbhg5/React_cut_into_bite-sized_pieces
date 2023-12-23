@@ -1,0 +1,246 @@
+[2023.12.23 동기 & 비동기]
+
+순서대로 실행하는 것과 그렇지 않은 것들
+
+1. 비동기란?
+수행해야 할 작업(함수) 3개
+function taskA() {
+    console.log("TASK A");
+}
+function taskB() {
+    console.log("TASK B");
+}
+function taskC() {
+    console.log("TASK C");
+}
+
+작업 실행(함수 호출) 순서
+taskA();
+taskB();
+taskC();
+
+1) 자바스크립트의 싱글 스레드 작업 수행 방식 : 블로킹 방식
+Thread - taskA (0.3초) - taskB (0.5초) - taskC (0.2초) ->
+
+* Thread(쓰레드) : 코드를 한 줄 한 줄 실행시키는 일꾼
+
+자바스크립트는 코드가 작성된 순서대로 작업을 처리함. 이전 작업이 진행 중일 때는 다음 작업을 수행하지 않고 기다림. 먼저 작성된 코드를 먼저 다 실행하고 나서 뒤에 작성된 코드를 실행한다.
+→ 동기 방식의 처리
+
+2) 동기처리 방식의 문제점
+Thread - taskA (0.3초) - taskB (20초) - taskC (10초) ->
+
+동기적 처리의 단점은 하나의 작업이 너무 오래 걸리게 될 시, 모든 작업이 오래 걸리는 하나의 작업이 종료되기 전까지 올 스탑되기 때문에, 전반적인 흐름이 느려진다. 웹 사이트에서 버튼 하나하나마다 30초씩 걸리면 속 터진다.
+→ 동기처리 방식의 문제점
+
+3) 멀티 쓰레드
+Thread - taskA (0.3초) ->
+ThreadA - taskB (20초) ->
+ThreadB - taskC (10초) ->
+
+코드를 실행하는 일꾼 Thread를 여러개 사용하는 방식인 'MultiThread'(멀티 쓰레드) 방식으로 작동시키면 작업 분할 가능. 오래 걸리는 일이 있어도 다른 일꾼 Thread에게 지시하면 되므로 괜찮음.
+그러나 자바스크립트는 싱글 쓰레드로 동작함. 즉 이런 방식으로 일꾼을 여러개 사용하는 방법 사용이 불가함.
+
+4) 비동기 방식 : 논 블로킹 방식
+Thread - taskA (0.3초) ->
+       - taskB (20초)
+       - taskC (10초)
+
+싱글 쓰레드 방식을 이용하면서, 동기적 작업의 단점을 극복하기 위해 여러 개의 작업을 동시에 실행시킴. 즉, 먼저 작성된 코드의 결과를 기다리지 않고 다음 코드를 바로 실행함.
+→ 비동기 작업
+
+Thread - taskA (0.3초) A콜백 ->
+       - taskB (20초) B콜백
+       - taskC (10초) C콜백
+
+taskA((resultA) => {
+    console.log(`A 끝났습니다. 작업 결과 : ${resultA}`); // A콜백
+});
+taskA((resultB) => {
+    console.log(`B 끝났습니다. 작업 결과 : ${resultB}`); // B콜백
+});
+taskA((resultC) => {
+    console.log(`C 끝났습니다. 작업 결과 : ${resultC}`); // C콜백
+});
+
+2. 동기 방식과 비동기 방식의 비교
+// 동기 방식
+function taskA() {
+    console.log("A 작업 끝");
+}
+
+taskA();
+console.log("코드 끝");
+
+/*
+- 콘솔
+A 작업 끝
+코드 끝
+*/
+
+// 비동기 방식
+function taskA() {
+    setTimeout(() => {
+        console.log("A TASK END");
+    }, 2000);
+}
+
+taskA();
+console.log("코드 끝");
+
+/*
+- 콘솔
+코드 끝
+A TASK END
+*/
+
+// 콜백함수 전달을 이용한 비동기 함수 결과값 활용
+function taskA(a, b, cb) {
+    setTimeout(() => {
+        const res = a + b; // 지역 상수
+        cb(res);
+    }, 3000);
+}
+
+taskA(3, 4, (res) => {
+    console.log("A TASK RESULT : ", res);
+});
+console.log("코드 끝");
+
+/*
+- 콘솔
+코드 끝
+A TASK RESULT : 7
+*/
+
+// 3가지 비동기 처리 함수 실행 결과 시간 비교
+function taskA(a, b, cb) {
+    setTimeout(() => {
+        const res = a + b;
+        cb(res);
+    }, 3000);
+}
+function taskB(a, cb) {
+    setTimeout(() => {
+        const res = a * 2;
+        cb(res);
+    }, 1000);
+}
+function taskC(a, cb) {
+    setTimeout(() => {
+        const res = a * -1;
+        cb(res);
+    }, 2000);
+}
+
+taskA(3, 4, (res) => {
+    console.log("A TASK RESULT : ", res);
+});
+taskB(7, (res) => {
+    console.log("B TASK RESULT : ", res);
+});
+taskB(14, (res) => {
+    console.log("C TASK RESULT : ", res);
+});
+
+console.log("코드 끝");
+
+/*
+- 콘솔
+코드 끝
+B TASK RESULT : 14
+C TASK RESULT : -14
+A TASK RESULT : 7
+*/
+
+3. 자바스크립트 엔진의 동기 코드와 비동기 코드 실행 원리
+자바스크립트로 작성한 코드는 JS Engine을 통해 해석되고 실행됨.
+JS Engine 구성요소 : Heap(메모리 할당), Call Stack(코드 실행)
+
+1) 동기 코드 실행
+function one() {
+    return 1;
+}
+function two() {
+    return one() + 1;
+}
+function three() {
+    return two() + 1;
+}
+
+console.log(three());
+
+자바스크립트 코드가 실행되면, 자바스크립트 코드들 가장 최상위 문맥인 Main Context가 Call Stack에 가장 먼저 들어온다. Main Context가 Call Stack에 들어오는 순간이 프로그램 실행 순간이고, Main Context가 Call Stack에서 나가는 순간이 프로그램이 프로그램이 종료되는 순간이다.
+바로 첫번째 코드 console.log(three()); 가 실행되고, three() 함수가 Call Stack에 추가된다. three() 함수에서 two() 함수를 호출하므로 Call Stack에 추가된다. two() 함수에서는 one() 함수를 호출하므로 또 Call Stack에 추가된다.
+Call Stack에서는 종료된 함수를 바로 Stack에서 제거한다. one() 함수에서는 1을 return하고 종료되므로, Call Stack에서 제거된다(사진 1).
+
+(사진 1)
+
+이후 two() 함수에서는 2를 return하고 종료되므로 Call Stack에서 제거되고, three() 함수에서도 3을 return하고 종료되므로 제거된다. console.log(); 에서 3을 출력하면 더이상 실행할 코드가 없으므로, 프로그램이 종료되어야 한다. 프로그램을 종료하기 위해 Call Stack에서 Main Context까지 제거하게 된다.
+
+코드를 직접 실행하는 Thread는 Call Stack 하나 만을 담당하고, Call Stack의 작동 방식대로 명령을 처리한다. 자바스크립트 엔진은 Call Stack이 딱 하나 있기 때문에, 자바스크립트가 싱글 쓰레드로 동작한다.
+
+2) 비동기 코드 실행
+function acyncAdd(a, b, cb) {
+    setTimeout(() => {
+        const res = a + b;
+        cb(res);
+    }, 3000);
+}
+
+acyncAdd(1, 3, (res) => {
+    console.log("결과 : ", res);
+});
+
+자바스크립트 코드가 실행되면, Main Context가 Call Stack에 들어온다. acyncAdd() 함수가 Call Stack에 추가되어 실행된다. cb()라는 콜백함수가 포함된 비동기 함수 setTimeout() 함수는 Call Stack이 아닌 Web APIs로 넘긴다. 여기서 3초를 기다릴 때, Call Stack에서는 바로 다음 코드를 실행할 수 있기 때문에 acyncAdd() 함수를 끝내며 Call Stack에서 제거한다.
+3초 기다림이 끝날 때, Web APIs의 setTimeout() 함수도 제거되고, 콜백함수 cb()는 Callback Queue로 이동된다. Event Loop는 Call Stack의 Main Context를 제외한 모든 함수가 남아있지 않은지 계속 확인한 뒤, 모든 함수가 제거되면 Callback Queue의 cb() 콜백함수를 Call Stack으로 넘겨 수행되도록 한다.
+콜백함수 수행 이후 Call Stack에서 제거되면 더이상 실행할 코드가 없으므로 프로그램을 종료하기 위해 Call Stack에서 Main Context까지 제거하게 된다(사진2).
+
+(사진 2)
+
+4. 비동기 처리의 결과를 또다른 비동기 처리 인자로 넘기기
+// 콜백 지옥
+function taskA(a, b, cb) {
+    setTimeout(() => {
+        const res = a + b;
+        cb(res);
+    }, 3000);
+}
+function taskB(a, cb) {
+    setTimeout(() => {
+        const res = a * 2;
+        cb(res);
+    }, 1000);
+}
+function taskC(a, cb) {
+    setTimeout(() => {
+        const res = a * -1;
+        cb(res);
+    }, 2000);
+}
+
+taskA(4, 5, (a_res) => {
+    console.log("A RESULT : ", a_res);
+    taskB(a_res, (b_res) => {
+        console.log("B RESULT : ", b_res);
+        taskC(b_res, (c_res) => {
+            console.log("C RESULT : ", c_res);
+        });
+    });
+});
+
+console.log("코드 끝");
+
+/*
+- 콘솔
+코드 끝
+A TASK RESULT : 9
+B TASK RESULT : 18
+C TASK RESULT : -18
+*/
+
+가독성이 별로좋지 않은데다, 함수도 많아진다면 콜백 함수가 끝도 없이 연결되는 콜백 지옥을 경험하게 된다.
+콜백 지옥을 구원하기 위한 자바스크립트의 비동기 담당 객체 Promise가 있다.
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
