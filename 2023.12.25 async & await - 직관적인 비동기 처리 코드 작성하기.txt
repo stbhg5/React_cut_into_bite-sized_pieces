@@ -1,0 +1,87 @@
+[2023.12.25 async & await - 직관적인 비동기 처리 코드 작성하기]
+
+1. async
+async : 비동기를 다루는 기능이자 Promise를 더 쉽게 이용할 수 있도록 도와준다. async 키워드 붙은 함수의 return 값은 Promise 객체 resolve 결과값.
+
+// async
+// 일반 함수
+function hello() {
+    return "hello";
+}
+
+// async 비동기 함수
+async function helloAsync() {
+    return "hello Async";
+}
+
+console.log(hello());
+console.log(helloAsync());
+/*
+- 콘솔
+hello
+Promise{<pending>}
+*/
+
+// async 키워드 붙은 함수의 return 값은 Promise 객체 resolve 결과값
+helloAsync().then((res) => {
+    console.log(res);
+});
+/*
+- 콘솔
+hello Async
+*/
+
+2. await
+await : await 키워드가 붙은 함수의 호출은 동기적으로 수행되어, 호출한 함수가 끝나기 전까지 그 아래 라인을 수행하지 않는다.
+async 키워드가 붙은 함수 내에서만 사용할 수 있다.
+
+// await 활용 전
+// 매개변수 만큼 대기하는 함수
+function delay(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms); // 전달받은 콜백함수를 바로 매개변수로 사용 가능
+    });
+}
+
+// async 비동기 함수
+async function helloAsync() {
+    return delay(3000).then(() => {
+        return "hello Async";
+    });
+}
+
+helloAsync().then((res) => {
+    console.log(res);
+});
+/*
+- 콘솔
+hello Async
+*/
+
+// await 활용 후
+// 매개변수 만큼 대기하는 함수
+function delay(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms); // 전달받은 콜백함수를 바로 매개변수로 사용 가능
+    });
+}
+
+// async 비동기 함수 (await 활용)
+async function helloAsync() {
+    await delay(3000);
+    return "hello Async";
+}
+
+async function main() {
+    const res = await helloAsync();
+    console.log(res);
+}
+
+main();
+/*
+- 콘솔
+hello Async
+*/
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
