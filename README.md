@@ -31,4 +31,5 @@
     <a href="https://stbhg5.tistory.com/313">동기 & 비동기</a><br/>
     <a href="https://stbhg5.tistory.com/314">Promise - 콜백 지옥에서 탈출하기</a><br/>
     <a href="https://stbhg5.tistory.com/315">async & await - 직관적인 비동기 처리 코드 작성하기</a><br/>
+    <a href="https://stbhg5.tistory.com/316">API 호출하기</a><br/>
     <br/>
