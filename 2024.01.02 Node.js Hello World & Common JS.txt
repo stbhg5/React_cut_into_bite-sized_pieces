@@ -1,0 +1,84 @@
+[2024.01.02 Node.js Hello World & Common JS]
+
+Hello World 부터 Common JS Module System 까지
+
+1. Node.js 를 이용한 자바스크립트 파일 실행
+- index.js
+console.log("Hello Node js");
+
+vscode에서 패널을 통해 터미널 보기 : View - Appearance - Panel 체크
+
+* 터미널이란?
+GUI(Graphic User Interface) : 아이콘같은 그래픽을 기반으로 마우스 클릭으로 명령을 내릴 수 있게 해주는 방식
+CLI(Command Line Interface) : 수행할 명령을 직접 텍스트로 타이핑하는 방식
+이 때 명령을 내리는 곳이 터미널이다.
+
+node.js로 index.js 라는 파일을 사용하라는 명령하기 위해 터미널을 사용한다.
+터미널에서 index.js가 존재하는 경로로 찾아가서 명령하기.
+
+- 터미널
+node index.js
+    Hello Node js
+
+node.js로 자바스크립트 실행시 실행된 터미널에 콘솔이 찍힌다.
+
+- calc.js
+const add = (a, b) => a + b;
+
+console.log(add(1, 2));
+
+- 터미널
+node calc.js
+    3
+
+2. 모듈 내보내기 작업을 이용한 다른 자바스크립트 파일의 함수 사용
+모듈 : 어떤 기능을 담당하는 분리된 각각의 파일
+
+- calc.js
+// 계산 기능을 담당하는 파일(모듈)
+const add = (a, b) => a + b;
+const sub = (a, b) => a - b;
+
+// 모듈 내보내기 (객체 단위로 모듈 내보내기 가능)
+module.exports = {
+    moduleName: "calc module"
+  , add: add
+  , sub: sub
+}
+
+- index.js
+// require("경로") 내장함수 사용
+const calc = require("./calc");
+
+console.log(calc);
+
+- 터미널
+node index.js
+    {
+      moduleName: 'calc module',
+      add: [Function: add],
+      sub: [Function: sub]
+    }
+
+여기서 주의할 사항은 module.exports 내장함수와 require() 내장함수는 node.js의 내장함수 이기 때문에 기존에 사용하던 바닐라js 에선 이용이 제한된다.
+
+- index.js
+// require("경로") 내장함수 사용
+const calc = require("./calc");
+
+console.log(calc.add(1, 2));
+console.log(calc.add(4, 5));
+console.log(calc.sub(10, 2));
+
+- 터미널
+node index.js
+    3
+    9
+    8
+
+모듈 시스템 : 모듈을 내보낼 수 있고, 불러와서 사용할 수 있는 함수같은 기능들을 제공하는 시스템
+이러한 module.exports 내장함수로 내보내고, 내보낸 모듈을 require("경로") 내장함수로 불러오는 모듈 시스템은 node.js가 기본적으로 제공하는 'Common JS' 라는 모듈 시스템이다.
+이 외에도 'ES 모듈' 이라는 모듈 시스템이 존재한다.
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
