@@ -1,0 +1,179 @@
+[2024.01.04 Node.js 패키지 생성 및 외부 패키지 사용하기]
+
+프로젝트를 생성하고 외부 모듈을 사용해보기
+
+NPM (Node Package Manager) : Node.js의 패키지 관리 도구
+Package : 누군가 따로 만들어놓은 Node.js 모듈
+
+1. NPM 이용하여 패키지 생성 후 실행
+react-package-example 폴더 생성 후 vscode에서 Open Folder로 불러와서 터미널 실행
+
+- 터미널
+npm init
+    This utility will walk you through creating a package.json file.
+    It only covers the most common items, and tries to guess sensible defaults.
+
+    See `npm help init` for definitive documentation on these fields
+    and exactly what they do.
+
+    Use `npm install <pkg>` afterwards to install a package and
+    save it as a dependency in the package.json file.
+
+    Press ^C at any time to quit.
+    package name: (react-package-example) package-example1
+    version: (1.0.0)                                                                                                                                                                                                                 
+    description:                                                                                                                                                                                                                     
+    entry point: (index.js)                                                                                                                                                                                                          
+    test command:                                                                                                                                                                                                                    
+    git repository:                                                                                                                                                                                                                  
+    keywords:                                                                                                                                                                                                                        
+    author: Jint                                                                                                                                                                                                                     
+    license: (ISC)                                                                                                                                                                                                                   
+    About to write to D:\개발\react-package-example\package.json:
+
+    {
+    "name": "package-example1",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Jint",
+    "license": "ISC"
+    }
+
+    Is this OK? (yes) yes
+
+이후 react-package-example 폴더에 package.json 파일이 생성되며 패키지 초기화 완료.
+
+- package.json
+{
+  "name": "package-example1",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Jint",
+  "license": "ISC"
+}
+
+package.json 이라는 파일은 우리가 만들 패키지의 정보를 기록하는 환경설정 파일이다(이름, 버전, 설명, 진입 파일, 스크립트, 저자, 라이센스 등등 명시).
+main 에는 여러개의 파일 중에 실행할 패키지 파일을 명시함. 즉 진입 파일.
+scripts 는 패키지를 개발하면서 자주 실행해야 하는 명령어를 사전에 정의할 수 있는 곳.
+start 를 입력하면 터미널에 'node index.js' 명령어가 실행된다.
+
+- 터미널
+npm start
+    > package-example1@1.0.0 start
+    > node index.js
+
+    node:internal/modules/cjs/loader:1147
+    throw err;
+    ^
+
+    Error: Cannot find module 'D:\개발\react-package-example\index.js'
+        at Module._resolveFilename (node:internal/modules/cjs/loader:1144:15)
+        at Module._load (node:internal/modules/cjs/loader:985:27)
+        at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:135:12)
+        at node:internal/main/run_main_module:28:49 {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: []
+    }
+
+    Node.js v20.10.0
+
+index.js 모듈을 찾을 수 없다는 에러 발생. 당연히 만들지 않았으니 발생. 이렇게 node.js에서 발생하는 에러는 친절하게 대부분 에러메시지 제공한다.
+react-package-example 폴더에 index.js 파일 생성 후 다시 터미널에서 확인해보기.
+
+- index.js
+console.log("hello node.js package");
+
+- 터미널
+npm start
+    > package-example1@1.0.0 start
+    > node index.js
+
+    hello node.js package
+
+2. NPM 이용하여 외부 패키지 실행
+구글에 npmjs 검색하여 https://www.npmjs.com/ 접속. node.js 패키지들의 쇼핑몰. 대부분 오픈소스 패키지로 제공됨.
+npm에 randomcolor 검색하여 exact match 하는 https://www.npmjs.com/package/randomcolor 에 접속하기.
+npm 모듈 상세페이지에서는 이 모듈이 무엇이고, 어떻게 사용해야 하고, 다운로드는 어떻게 받아야 하는지 등 패키지 관련 정보가 잘 적혀있다.
+
+- 터미널
+npm i randomcolor
+    > package-example1@1.0.0 start
+    > node index.js
+
+    hello node.js package
+    PS D:\개발\react-package-example> npm i randomcolor
+
+    added 1 package, and audited 2 packages in 1s
+
+    found 0 vulnerabilities
+
+i는 install의 약자. 설치전 설치하려고 하는 모듈이 현재 다루는 패키지 내에 실행되는지 점검하고 설치하기. package.json 파일 위치가 기준이 된다.
+설치 후 package.json 파일을 보면 변화가 생겼다.
+
+- package.json
+{
+  "name": "package-example1",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Jint",
+  "license": "ISC",
+  "dependencies": {
+    "randomcolor": "^0.6.2"
+  }
+}
+
+dependencies 필드에 randomcolor 패키지와 버전이 추가되어 있다. package.json 파일을 통해 이 패키지는 어떤 외부 패키지들을 사용했는지 알 수 있다. ^는 0.6.2 버전 이상으로만 설치가 진행이 된다고 명시(range 버전 : 버전의 범위 명시).
+이후 package-lock.json 파일과 node_modules 폴더가 생성된 것을 볼 수 있다.
+node_modules 폴더 안에 randomcolor 라는 패키지가 들어있다.
+package-lock.json 파일은 현재 패키지에 설치된 외부 패키지들 버전 명시.
+
+npm 모듈 상세페이지에 명시된 사용법대로 index.js 에서 사용해본다.
+
+- index.js
+// npm i 를 통해 받은 외부 모듈은 require()에 경로 명시할 필요 없다.
+const randomColor = require('randomcolor'); // import the script
+var color = randomColor(); // a hex code for an attractive color
+console.log(color);
+
+- 터미널
+npm start
+    > package-example1@1.0.0 start
+    > node index.js
+
+    #b9b5ff
+
+핵스코드의 랜덤 컬러 생성 완료.
+진짜 랜덤인지 확인하기 위해 3개의 랜덤 컬러받아보기.
+
+- index.js
+const randomColor = require('randomcolor');
+let color1 = randomColor();
+let color2 = randomColor();
+let color3 = randomColor();
+console.log(color1, color2, color3);
+
+- 터미널
+npm start
+    > package-example1@1.0.0 start
+    > node index.js
+
+    #1fad76 #cfffaf #f438cf
+
+3가지의 랜덤 컬러 확인 완료.
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
