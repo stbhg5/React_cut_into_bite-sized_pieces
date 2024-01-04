@@ -38,5 +38,6 @@
     <a href="https://stbhg5.tistory.com/317">Node.js란?</a><br/>
     <a href="https://stbhg5.tistory.com/318">Node.js & VsCode 설치하기</a><br/>
     <a href="https://stbhg5.tistory.com/319">Node.js Hello World & Common JS</a><br/>
+    <a href="https://stbhg5.tistory.com/320">Node.js 패키지 생성 및 외부 패키지 사용하기</a><br/>
     <br/>
 
