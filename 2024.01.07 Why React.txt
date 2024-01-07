@@ -1,0 +1,179 @@
+[2024.01.07 Why React?]
+
+(섹션 4. React.js 기초)
+
+React는 왜 필요한걸까?
+
+1. Why React? 첫 번째 이유 : React 는 Component 기반의 UI 라이브러리
+- index.html
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>잘라먹는 React.js - About</title>
+    </head>
+    <body>
+        <! -- HEADER -->
+        <header>
+            <h1>안녕하세요</h1>
+            <b>저는 인프런에서 React.js를 강의하는 Winterlood 이정환입니다</b>
+        </header>
+
+        <!-- NAV -->
+        <nav>
+            <ul>
+                <a href="./index.html"><li>Home</li></a>
+                <a href="./about.html"><li>About></li></a>
+            </ul>
+        </nav>
+
+        <!-- ARTICLE -->
+        <article>
+            <h3 style="color: blue;">여기는 HOME 입니다</h3>
+        </article>
+
+        <!-- FOOTER -->
+        <footer>
+            <p>방문해주셔서 감사합니다</p>
+        </footer>
+    </body>
+</html>
+
+- about.html
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>잘라먹는 React.js - About</title>
+    </head>
+    <body>
+        <! -- HEADER -->
+        <header>
+            <h1>안녕하세요</h1>
+            <b>저는 인프런에서 React.js를 강의하는 Winterlood 이정환입니다</b>
+        </header>
+
+        <!-- NAV -->
+        <nav>
+            <ul>
+                <a href="./index.html"><li>Home</li></a>
+                <a href="./about.html"><li>About></li></a>
+            </ul>
+        </nav>
+
+        <!-- ARTICLE -->
+        <article>
+            <h3 style="color: red;">여기는 ABOUT 입니다</h3>
+        </article>
+
+        <!-- FOOTER -->
+        <footer>
+            <p>방문해주셔서 감사합니다</p>
+        </footer>
+    </body>
+</html>
+
+위 두 소스코드를 비교해보면 header, nav, footer 태그 구성요소는 모두 똑같고 article 태그의 구성요소만 다르다. 이렇게 웹 사이트에서는 중복되는 부분들이 많다는 큰 문제가 발생한다. 만약 HEADER 섹션 코드의 수정이 필요할 때, 파일 하나 수정하고 끝나는 것이 아닌 HEADER 섹션을 가진 모든 파일을 수정해야 한다. 즉, 유지보수가 어려워진다.
+이러한 중복코드 변경 사항으로 인한 문제가 발생하는 상황을 'Shotgun Surgery(산탄총 수술)' 이라고 부른다. 샷건 맞은 사람을 수술하는 것처럼, 하나의 문제가 수많은 파일들을 동시에 수정하게 해야한다고 해서 유래된 말이다.
+
+- index.html
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>잘라먹는 React.js - About</title>
+    </head>
+    <body>
+        <! -- HEADER -->
+        <MyHeader/>
+
+        <!-- NAV -->
+        <MyNav/>
+
+        <!-- ARTICLE -->
+        <article>
+            <h3 style="color: blue;">여기는 HOME 입니다</h3>
+        </article>
+
+        <!-- FOOTER -->
+        <MyFooter/>
+    </body>
+</html>
+
+다른 페이지에서도 공통적으로 사용할 거라고 예상되는 요소들을 별도의 파일이나 모듈로 제작한 뒤, 필요한 파일이나 페이지마다 컴포넌트의 이름으로 불러오는 방식을 사용하면 눈에띄게 코드량이 줄어든다.
+이렇게 재사용되는 요소들을 컴포넌트로 만들어 사용하는 방식을 '컴포넌트화 방식'이라고 부른다. 컴포넌트화 방식을 사용하면 수정해야할 컴포넌트 하나만 수정하면 그 컴포넌트를 사용하는 다른 파일들을 다 수정할 필요 없이 적용된다. 산탄총 수술을 할 필요가 없어진다. 유지보수가 쉬워진다.
+
+React는 Component 기반 UI 라이브러리 이기 때문에, 모든 HTML 요소들을 다 컴포넌트로 만들어서 재사용할 수 있는 훌륭한 기술을 가지고 있다. React 로 웹을 개발하면 레고 만들어 조립하듯 개발할 수 있다.
+
+2. Why React? 두 번째 이유 : 선언형 프로그래밍
+- html 과 바닐라 javascript 를 이용한 카운터 예제
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Counter</title>
+        <meta charset="UTF-8"/>
+        <script>
+            function plus() {
+                const result = document.getElementById("result");
+                const current = parseInt(result.innerText, 10);
+                result.innerHTML = current + 1;
+            }
+            function minus() {
+                const result = document.getElementById("result");
+                const current = parseInt(result.innerText, 10);
+                result.innerHTML = current - 1;
+            }
+        </script>
+    </head>
+    <body>
+        <p>Simple Counter</p>
+        <h2 id="result">0</h2>
+        <div>
+            <button onclick="minus()">Minus</button>
+            <button onclick="plus()">Plus</button>
+        </div>
+        <script src="src/index.js"></script>
+    </body>
+</html>
+
+명령형 프로그래밍 : 절차를 하나하나 다 나열 해야함 - jQuery
+1) 결과를 표시할 요소를 가져온다(id="result")
+2) 현재 결과값을 10진수 기준, 숫자형으로 변환해서 가져와 current 라는 상수에 저장한다.
+3) current 상수에 저장된 값을 결과를 표시할 요소의 값에 plus 라면 +1 해서 넣고, minus 라면 -1 해서 넣는다.
+
+선언형 프로그래밍 : 그냥 목적을 바로 말함 - React.js
+1) plus 를 누르면, result 값에 +1 한다. minus 를 눌렀다면 반대로 한다.
+
+3. Why React? 세 번째 이유 : Virtual DOM
+DOM : Document Object Model(문서 객체 모델) - 브라우저가 실제로 사용하는 객체
+
+- DOM을 계속 변경하는 예제
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Item List</title>
+        <meta charset="UTF-8"/>
+        <script>
+            function addItem() {
+                const ul = document.getElementById("list");
+                for (let i=0; i < 5; i++) {
+                    const curElm = document.createElement("li");
+                    curElm.innerHTML = `hi ${i}`;
+                    ul.append(curElm);
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <h2 id="theme">Item List</h2>
+        <div>
+            <ul id="list"></ul>
+            <button onclick="addItem()">add</button>
+        </div>
+    </body>
+</html>
+
+append() 가 사용될 때마다 DOM 요소가 하나씩 추가된다. 이런 잦은 업데이트 상황에서 브라우저는 필요 이상의 많은 연산을 수행하여 성능저하의 문제로 이어진다.
+
+Virtual DOM : 가상의 돔을 사용하여(렌더링 과정 안 거침, 화면에 실제로 그리지 않음), DOM 요소를 업데이트 한 것들을 모아서 한 번에 실제 돔에 업데이트 하여 과다연산을 해결한다.
+(State Change → Compute Diff → Re-render, 요소를 추가하면서 발생하는 변화를 가상의 돔에 미리 업데이트하여 한 번에 실제 돔에 업데이트)
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
