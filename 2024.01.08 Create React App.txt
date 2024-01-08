@@ -1,0 +1,345 @@
+[2024.01.08 Create React App]
+
+React App을 세상에서 가장 빠르고 편하게 만드는 방법
+
+1. React App을 만드는 방법
+React.js : Node 기반의 Javascript UI 라이브러리
+Webpack : 다수의 자바스크립트 파일을 하나의 파일로 합쳐주는 모듈 번들 라이브러리
+Babel : JSX 등의 쉽고 직관적인 자바스크립트 문법을 사용할 수 있도록 해주는 라이브러리
+...
+언제 다 설정하지..?
+Create React App : 이미 세팅 완료된 패키지 Boiler Plate - 보일러를 찍어내는 틀, 마치 보일러를 찍어내듯, 서비스를 개발할 수 있는 빵 틀의 역할을 하는 패키지를 의미함(리액트에 사용하는 패키지를 미리 설치하고 복잡한 환경설정까지 다 해놓은 패키지를 감싼 패키지).
+
+reactexam1 폴더 생성 후 vscode에서 Open Folder
+View - Appearance - Panel
+
+※ npx 란?
+npx 는 설치되어 있지 않은 패키지를 딱 1번만 쓰고싶을 때 사용.
+- 강사님 답변
+npx는 execute npm package binaries의 줄임말로, npm에 속해 있는 npm 패키지 실행 도구입니다.
+여기서 npx가 패키지 실행 도구 라는 것이 npm과의 큰 차이점이자 장점입니다.
+npx는 npm과 달리 모듈을 로컬에 저장하지 않습니다. 대신 매번 최신 버전의 파일만을 임시로 불러와 실행 시킨 후에, 다시 그 파일은 없어지는 방식으로 모듈이 돌아가고 있습니다.
+따라서 이는 create-react-app같은 보일러 플레이트 모듈에 효과적 입니다. npx를 통해 create-react-app을 설치할 경우에는 매번 최신 버전만을 가져와서 설치해 주기 때문에 지금 어떤 버전을 사용하고 있는 지 신경쓸 필요가 없어집니다.
+
+- 터미널
+npx -v
+    10.2.3
+(만약 설치되어 있지 않다면 npm install -g npx 명령어를 통해 설치)
+npx create-react-app reactexam1
+    npm ERR! code ENOENT
+    npm ERR! syscall lstat
+    npm ERR! path C:\Users\admin\AppData\Roaming\npm
+    npm ERR! errno -4058
+    npm ERR! enoent ENOENT: no such file or directory, lstat 'C:\Users\admin\AppData\Roaming\npm'
+    npm ERR! enoent This is related to npm not being able to find a file.
+    npm ERR! enoent
+
+    npm ERR! A complete log of this run can be found in: C:\Users\admin\AppData\Local\npm-cache\_logs\2024-01-08T12_30_00_861Z-debug-0.log
+    PS D:\개발\reactexam1> npm cache clean -f 
+    npm WARN using --force Recommended protections disabled.
+
+오류가 발생하여, npm 캐시 초기화 후 cra 글로벌 삭제 및 재설치
+
+- 터미널
+npm cache clean -f
+    npm WARN using --force Recommended protections disabled.
+npm uninstall -g create-react-app
+    up to date in 266ms
+npx create-react-app my-app
+    Need to install the following packages:
+    create-react-app@5.0.1
+    Ok to proceed? (y) y
+    npm WARN deprecated tar@2.2.2: This version of tar is no longer supported, and will not receive security updates. Please upgrade asap.
+
+    Creating a new React app in D:\개발\reactexam1\my-app.
+
+    Installing packages. This might take a couple of minutes.
+    Installing react, react-dom, and react-scripts with cra-template...
+
+
+    added 1484 packages in 38s
+
+    250 packages are looking for funding
+    run `npm fund` for details
+    Git repo not initialized Error: Command failed: git --version
+        at checkExecSyncError (node:child_process:890:11)
+        at execSync (node:child_process:962:15)
+        at tryGitInit (D:\개발\reactexam1\my-app\node_modules\react-scripts\scripts\init.js:46:5)
+        at module.exports (D:\개발\reactexam1\my-app\node_modules\react-scripts\scripts\init.js:276:7)
+        at [eval]:3:14
+        at runScriptInThisContext (node:internal/vm:144:10)
+        at node:internal/process/execution:109:14
+        at [eval]-wrapper:6:24
+        at runScript (node:internal/process/execution:92:62) {
+    status: 1,
+    signal: null,
+    output: [ null, null, null ],
+    pid: 8740,
+    stdout: null,
+    stderr: null
+    }
+
+    Installing template dependencies using npm...
+
+    added 69 packages, and changed 1 package in 3s
+
+    254 packages are looking for funding
+    run `npm fund` for details
+    Removing template package using npm...
+
+
+    removed 1 package, and audited 1553 packages in 2s
+
+    254 packages are looking for funding
+    run `npm fund` for details
+
+    8 vulnerabilities (2 moderate, 6 high)
+
+    To address all issues (including breaking changes), run:
+    npm audit fix --force
+
+    Run `npm audit` for details.
+
+    Success! Created my-app at D:\개발\reactexam1\my-app
+    Inside that directory, you can run several commands:
+
+    npm start
+        Starts the development server.
+
+    npm run build
+        Bundles the app into static files for production.
+
+    npm test
+        Starts the test runner.
+
+    npm run eject
+        Removes this tool and copies build dependencies, configuration files
+        and scripts into the app directory. If you do this, you can’t go back!
+
+    We suggest that you begin by typing:
+
+    cd my-app
+    npm start
+
+    Happy hacking!
+
+이렇게 설치 완료. 이후 my-app 폴더에 설치된 폴더 및 파일들을 상위폴더 reactexam1 으로 이동시킨 뒤, my-app 폴더는 삭제. reactexam1 폴더가 루트 폴더가 되었다.
+reactexam1 폴더의 package.json 파일을 확인한다.
+
+- package.json
+{
+  "name": "my-app",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
+
+dependencies 를 보면 7개의 패키지가 설치된 것 확인.
+scripts 를 확인하면, start 는 리액트 어플리케이션을 실행한다. 
+
+- 터미널
+npm start
+    Starting the development server...
+
+    One of your dependencies, babel-preset-react-app, is importing the
+    Compiled successfully!
+
+    You can now view my-app in the browser.
+
+    Local:            http://localhost:3000
+    On Your Network:  http://172.30.1.15:3000
+
+    Note that the development build is not optimized.
+    To create a production build, use npm run build.
+
+    webpack compiled successfully
+
+(리액트 앱 실행 화면)
+npm start 명령어를 이용하여 리액트 앱을 실행 시킨 순간 현재 컴퓨터는 웹 서버가 된다. 크롬 브라우저에서는 현재 컴퓨터의 주소로 웹 사이트에 접속할 수 있다. 결론적으로 리액트 앱은 node.js 기반의 웹 서버 위에서 동작하고 있다.
+리액트 앱을 종료하고 싶다면 터미널에서 ctrl + c 를 누르면 된다.
+
+- 터미널
+(ctrl + c)
+    일괄 작업을 끝내시겠습니까 (Y/N)? Y
+
+reactexam1/src 폴더의 App.js 열기
+
+- App.js
+import logo from './logo.svg';
+import './App.css';
+
+function App() {
+  return (
+    <div className="App">
+      <header className="App-header">
+        <img src={logo} className="App-logo" alt="logo" />
+        <p>
+          Edit <code>src/App.js</code> and save to reload.
+        </p>
+        <a
+          className="App-link"
+          href="https://reactjs.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Learn React
+        </a>
+      </header>
+    </div>
+  );
+}
+
+export default App;
+
+header 태그 내용을 수정한다.
+
+- App.js
+import logo from './logo.svg';
+import './App.css';
+
+function App() {
+  return (
+    <div className="App">
+      <header className="App-header">
+        <h2>안녕 리액트</h2>
+      </header>
+    </div>
+  );
+}
+
+export default App;
+
+(리액트 앱 실행 화면2)
+
+App 함수가 반환하는 html 이 화면에 표시된다. 여기서 의문은 html 파일이 하나도 없는데 어떻게 자바스크립트 파일만으로 화면이 표시될까? 리액트 앱으로 구동되는 웹 사이트가 어떤 구조로 가지는지 개발자 도구와 소스를 통해 확인한다.
+
+(개발자 도구)
+
+- src/index.js
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+import reportWebVitals from './reportWebVitals';
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
+
+- public/index.html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Web site created using create-react-app"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+    <title>React App</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+  </body>
+</html>
+
+결론적으로, 리액트 앱이 실행되면서 src/index.js 가 실행되면서 public/index.html 의 id 가 root 인 div 아래로 App.js 의 App() 함수가 반환하는 값들이 들어간다.
+
+node_modules 폴더를 살펴보면 외부 모듈들이 저장되어 있는데 용량이 매우 크다. 만약 현재 리액트 프로젝트를 github에 올리거나 다른 사람에게 보낼 때 node_modules 폴더는 없어도 된다. package.json 과 package-lock.json 파일에 명시되어 있기 때문이다. 패키지에 node_modules 폴더가 없을 때 npm i 명령어를 터미널에 입력하면 자동으로 노드 모듈들이 다운로드 된다.
+public 폴더를 살펴보면 favicon.ico 는 아이콘 파일이다. 크롬 브라우저 상단 탭에 표시되는 아이콘이다. logo192.png, logo512.png, manifest.json 은 모바일 환경에서 웹 브라우저를 틀고 웹을 볼 때 홈 화면에 추가할 때 아이콘을 적용하거나 옵션을 적용할 때 쓰이는 옵션과 아이콘들이다. robots.txt 파일은 구글이나 네이버가 웹 사이트를 수집하여 검색엔진을 띄우는데, 수집하거나 수집하지 말아야하는 것을 경로를 기준으로 알려주는 파일이다.
+src 폴더를 살펴보면 App.css 라는 스타일 CSS 파일이 있고, App.test.js 파일은 테스트에 필요한 용도로 사용하는데 지워도 된다. index.css 는 스타일링 파일이다. logo.svg는 처음 리액트 앱 실행시 화면에 출력되었던 로고를 불러왔던 파일이다. 지워도 된다. reportWebVitals.js, setupTests.js 파일도 지워도 된다.
+
+다시 App.js 파일로 돌아온다.
+
+- App.js
+// import logo from './logo.svg';
+import './App.css';
+
+function App() {
+  let name = "송진성";
+
+  return (
+    <div className="App">
+      <header className="App-header">
+        <h2>안녕 리액트 {name}</h2>
+      </header>
+    </div>
+  );
+}
+
+export default App;
+
+함수 안에 변수를 선언하고 return 안에 중괄호를 써서 값을 넣으면 템플릿 리터럴을 쓴 것처럼 화면에 반영된다. 이렇게 자바스크립트와 html 을 합쳐서 사용할 수 있는 문법을 자바스크립트 표현식 즉, JSX 라고 부른다. 리액트에서는 JSX 문법을 사용해서 웹에 필요한 html 요소를 만들어낸다.
+이렇게 별도의 html 요소들을 묶어서 모듈처럼 만들고 내보내 다른 파일에서 쓸 수 있게 만드는 것을 컴포넌트 방식이라고 한다. 리액트는 App() 이라는 함수를 만들고 JSX 문법의 html 을 반환하여 컴포넌트를 만들 수 있다.
+Common JS 모듈시스템에서 module.expots 로 내보냈지만, ES 모듈시스템에서는 'export default 이름'을 사용하여 내보낸다(1개만 내보낼 수 있음). 다른 파일에서 불러올 때에는 'import 이름 from 파일경로'를 통해 불러올 수 있다.
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
