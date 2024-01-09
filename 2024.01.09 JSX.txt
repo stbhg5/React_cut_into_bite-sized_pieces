@@ -1,0 +1,226 @@
+[2024.01.09 JSX]
+
+HTML with Javascript
+
+1. JSX with React
+JSX 는 리액트의 컴포넌트를 만드는데 유용하게 사용되는 문법.
+
+- 터미널
+npm start
+    Compiled successfully!
+
+    You can now view my-app in the browser.
+
+    Local:            http://localhost:3000
+    On Your Network:  http://172.30.1.15:3000
+
+    Note that the development build is not optimized.
+    To create a production build, use npm run build.
+
+    webpack compiled successfully
+
+헤더 역할을 하는 컴포넌트 MyHeader.js 파일 생성 후 App.js 에서 불러오기.
+
+- MyHeader.js
+const MyHeader = () => {
+    return <header>헤더</header>
+};
+
+export default MyHeader;
+
+- App.js
+// import logo from './logo.svg';
+import './App.css';
+import MyHeader from './MyHeader';
+
+function App() {
+  let name = "송진성";
+
+  return (
+    <div className="App">
+      <MyHeader/>
+      <header className="App-header">
+        <h2>안녕 리액트 {name}</h2>
+      </header>
+    </div>
+  );
+}
+
+export default App;
+
+(헤더 추가)
+
+푸터 역할을 하는 컴포넌트 MyFooter.js 파일 생성.
+
+- MyFooter.js
+const MyFooter = () => {
+    return <footer>myfooter</footer>
+}
+
+export default MyFooter;
+
+index.js 에서 MyFooter 불러오기.
+
+- index.js
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+import reportWebVitals from './reportWebVitals';
+import MyFooter from './MyFooter';
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <App />
+    <MyFooter/>
+  </React.StrictMode>
+);
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
+
+index.js 에서 최상위 컴포넌트를 정의할 수 있다. 관례상 최상위 컴포넌트는 App 이라고 부른다.
+
+* JSX 문법
+1) 닫힘 규칙 : 여는 태그가 있으면 반드시 닫는 태그도 있어야 한다. Self-Closing 태그 활용 가능.
+2) 최상위 태그 규칙 : 가장 바깥의 태그인, 최상위 태그가 반드시 존재하여 다른 모든 태그들을 묶어줘야 한다.
+만약 최상위 태그로 안묶고 싶다면 <React.Fragment> 태그 혹은 <> 태그를 이용하면 된다.
+
+- 예시
+import React from "react";
+import './App.css';
+
+function App() {
+  return (
+    <React.Fragment> 또는 <>
+      <MyHeader/>
+      <header className="App-header">
+        <h2>안녕 리액트 {name}</h2>
+      </header>
+    </React.Fragment> 또는 </>
+  );
+}
+
+JSX 문법과 CSS 결합하여 스타일링 한다.
+JSX 문법에서는 class 단어가 자바스크립트 예약어 이기 때문에 쓸 수 없고 className 으로 쓴다.
+
+- App.Js
+// import logo from './logo.svg';
+import './App.css';
+import MyHeader from './MyHeader';
+
+function App() {
+  let name = "송진성";
+
+  return (
+    <div className="App">
+      <MyHeader/>
+        <h2>안녕 리액트 {name}</h2>
+        <b id="bold_text">React.js</b>
+    </div>
+  );
+}
+
+export default App;
+
+- App.css
+.App {
+  background-color: black;
+}
+
+h2 {
+  color: red;
+}
+
+#bold_text {
+  color: green;
+}
+
+(JSX 문법 + CSS 결합 스타일링)
+
+CSS 파일 사용하지 않고 객체를 만들어서 인라인 스타일링 방식 활용하기.
+
+- App.js
+// import logo from './logo.svg';
+// import './App.css';
+import MyHeader from './MyHeader';
+
+function App() {
+  let name = "송진성";
+
+  const style = {
+      App: {
+          backgroundColor: "black"
+      }
+    , h2: {
+          color: "red"
+      }
+    , bold_text: {
+          color: "green"
+      }
+  }
+
+  return (
+    <div style={style.App}>
+      <MyHeader/>
+        <h2 style={style.h2}>안녕 리액트 {name}</h2>
+        <b id="bold_text" style={style.bold_text}>React.js</b>
+    </div>
+  );
+}
+
+export default App;
+
+JSX 의 자바스크립트의 값을 사용하는 방법({} 중괄호 문법).
+
+- App.js
+// import logo from './logo.svg';
+// import './App.css';
+import MyHeader from './MyHeader';
+
+function App() {
+  let name = "송진성";
+
+  const style = {
+      App: {
+          backgroundColor: "black"
+      }
+    , h2: {
+          color: "red"
+      }
+    , bold_text: {
+          color: "green"
+      }
+  }
+
+  const func = () => {
+      return "func";
+  }
+
+  const number = 5;
+
+  return (
+    <div style={style.App}>
+      <MyHeader/>
+        <h2 style={style.h2}>안녕 리액트 {name}</h2>
+        <b id="bold_text" style={style.bold_text}>React.js</b>
+        <p style={style.bold_text}>표현식 {1 + 2}</p>
+        <p style={style.bold_text}>문자열 {"문자열"}</p>
+        <p style={style.bold_text}>함수호출 {func()}</p>
+        <p style={style.bold_text}>{number}는 : {number % 2 === 0 ? "짝수" : "홀수"} </p>
+    </div>
+  );
+}
+
+export default App;
+
+(JSX의 자바스크립트 값 사용하는 문법)
+
+변수 말고도 표현식, 문자열, 함수호출은 랜더링이 되지만 boolean 값, 배열 등과 같이 숫자나 문자열이 아닌 것을 넣으면 랜더링이 안된다. 즉 {}에는 문자열, 숫자만 포함 할 수 있다.
+삼항연산자 이용 가능. 이런식의 랜더링을 '조건부 랜더링'이라고 부른다.
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
