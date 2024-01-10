@@ -1,0 +1,84 @@
+[2024.01.10 (1) State]
+
+React State
+
+1. State
+State : 계속해서 변화하는 특정 상태. 상태에 따라 각각 다른 동작을 함.
+리액트에서 말하는 상태는 계속 값이 바뀌는 동적인 데이터. 상태를 바꾸는 등의 관리는 이걸 가진 컴포넌트가 직접 관리한다.
+
+Counter 예제 실행을 위해 src 폴더에 Counter.js 파일 생성
+
+- Counter.js
+import React, { useState } from 'react';
+
+const Counter = () => {
+
+    console.log("Counter 호출!");
+
+    // 0에서 출발
+    // 1씩 증가하고
+    // 1씩 감소하는
+    // count 상태
+
+    const[count, setCount] = useState(0); // 비구조화 할당 - 0 : 상태값, 1 : 상태값을 변화시키는 상태변화 함수, useState(초기값)
+
+    const onIncrease = () => {
+        setCount(count + 1);
+    }
+
+    const onDecrease = () => {
+        setCount(count - 1);
+    }
+
+    const[count2, setCount2] = useState(0);
+    const onIncrease2 = () => {
+        setCount2(count2 + 1);
+    }
+    const onDecrease2 = () => {
+        setCount2(count2 - 1);
+    }
+
+    return(
+        <div>
+            <h2>{count}</h2>
+            <button onClick={onIncrease}>+</button>
+            <button onClick={onDecrease}>-</button>
+
+            <h2>{count2}</h2>
+            <button onClick={onIncrease2}>+</button>
+            <button onClick={onDecrease2}>-</button>
+        </div>
+    )
+
+}
+
+export default Counter;
+
+- App.js
+// import logo from './logo.svg';
+// import './App.css';
+import MyHeader from './MyHeader';
+import Counter from './Counter';
+
+function App() {
+
+  return (
+    <div>
+      <MyHeader/>
+      <Counter/>
+    </div>
+  );
+
+}
+
+export default App;
+
+(Counter 예제 실행 결과 화면과 콘솔)
+
+자바스크립트 에서 <button onclick="onIncrease()"> 이런식으로 onclick 속성을 사용하지만, JSX 에서는 <button onClick={onIncrease}> 이렇게 카멜 케이스 onClick과 중괄호를 사용한다.
+컴포넌트는 자신이 가진 state가 변화하면 화면을 다시그려 리랜더링 한다. 즉, 함수가 다시 호출된다.
+또한 하나의 컴포넌트 안에 여러 개의 state를 가질 수 있다.
+이렇게 state는 매우 짧은 코드와 유연한 문법으로 화면에 나타나는 데이터를 쉽게 교체하고 수정하도록 도와준다.
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
