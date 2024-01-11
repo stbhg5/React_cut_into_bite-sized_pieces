@@ -48,3 +48,8 @@
     <a href="https://stbhg5.tistory.com/325">State</a><br/>
     <a href="https://stbhg5.tistory.com/326">Props</a><br/>
     <br/>
+
+<p>섹션 5. React 기본 - 간단한 일기장 프로젝트<p/>
+    <a href="https://stbhg5.tistory.com/327">프로젝트 소개</a><br/>
+    <br/>
+    
