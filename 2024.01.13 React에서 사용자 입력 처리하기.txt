@@ -1,0 +1,575 @@
+[2024.01.13 React에서 사용자 입력 처리하기]
+
+useState with <input/>
+
+simple_diary 폴더 만든 후 vscode 에서 Open Folder 로 열기. (필요하면 zoom in)
+
+- 터미널
+npx create-react-app simple_diary
+    Creating a new React app in D:\개발\simple_diary\simple_diary.
+
+    Installing packages. This might take a couple of minutes.
+    Installing react, react-dom, and react-scripts with cra-template...
+
+
+    added 1484 packages in 1m
+
+    250 packages are looking for funding
+    run `npm fund` for details
+    Git repo not initialized Error: Command failed: git --version
+        at checkExecSyncError (node:child_process:890:11)
+        at execSync (node:child_process:962:15)
+        at tryGitInit (D:\개발\simple_diary\simple_diary\node_modules\react-scripts\scripts\init.js:46:5)
+        at module.exports (D:\개발\simple_diary\simple_diary\node_modules\react-scripts\scripts\init.js:276:7)
+        at [eval]:3:14
+        at runScriptInThisContext (node:internal/vm:144:10)
+        at node:internal/process/execution:109:14
+        at [eval]-wrapper:6:24
+        at runScript (node:internal/process/execution:92:62) {
+    status: 1,
+    signal: null,
+    output: [ null, null, null ],
+    pid: 13564,
+    stdout: null,
+    stderr: null
+    }
+
+    Installing template dependencies using npm...
+
+    added 69 packages, and changed 1 package in 9s
+
+    254 packages are looking for funding
+    run `npm fund` for details
+    Removing template package using npm...
+
+
+    removed 1 package, and audited 1553 packages in 2s
+
+    254 packages are looking for funding
+    run `npm fund` for details
+
+    8 vulnerabilities (2 moderate, 6 high)
+
+    To address all issues (including breaking changes), run:
+    npm audit fix --force
+
+    Run `npm audit` for details.
+
+    Success! Created simple_diary at D:\개발\simple_diary\simple_diary
+    Inside that directory, you can run several commands:
+
+    npm start
+        Starts the development server.
+
+    npm run build
+        Bundles the app into static files for production.
+
+    npm test
+        Starts the test runner.
+
+    npm run eject
+        Removes this tool and copies build dependencies, configuration files
+        and scripts into the app directory. If you do this, you can’t go back!
+
+    We suggest that you begin by typing:
+
+    cd simple_diary
+    npm start
+
+    Happy hacking!
+
+이후 simple_diary\simple_diary 폴더 내의 내용물들을 한 계층 위인 simple_diary 로 옮긴다. 이후 기존 simple_diary 폴더는 삭제.
+src 폴더의 App.test.js, logo.svg, reportWebVitals.js, setupTests.js 파일 삭제.
+src\App.js 에서 필요없는 import 지우고 App() 함수의 return 안에 감싸주는 div 태그쌍 하나만 남겨두기.
+src\index.js 에서 'import reportWebVitals from './reportWebVitals';' 와 'reportWebVitals();' 지우기.
+src\App.css 파일 내용 비우기.
+
+1. 다양한 사용자 입력 처리하기
+세부 목표)
+- 한 줄 입력 처리하기
+- 여러 줄입력 처리하기
+- 선택 박스 입력 처리하기
+- 사용자 입력 데이터 핸들링하기
+
+- App.js
+import './App.css';
+
+function App() {
+  return (
+    <div className="App">
+      <h2>일기장</h2>
+    </div>
+  );
+}
+
+export default App;
+
+- 터미널
+npm start
+
+(일기장 화면)
+
+이제 본격적으로 Diary Editor 컴포넌트 만들기.
+src\DiaryEditor.js 파일 생성.
+
+- DiaryEditor.js
+const DiaryEditor = () => {
+  return <div className="DiaryEditor"></div>
+}
+
+export default DiaryEditor;
+
+className 을 컴포넌트 이름과 일치시킨다. CSS 의 class 를 이용하여 스타일링 할 때, 클래스 이름과 컴포넌트 이름을 일치시켜 직관적으로 스타일 코드 작성하기 위함.
+
+- App.js
+import './App.css';
+import DiaryEditor from './DiaryEditor';
+
+function App() {
+  return (
+    <div className="App">
+      <h2>일기장</h2>
+      <DiaryEditor/>
+    </div>
+  );
+}
+
+export default App;
+
+(DiaryEditor 컴포넌트 추가 완료)
+
+DiaryEditor 컴포넌트가 필요한 것 : 작성자, 일기 본문, 감정 점수
+
+1) 작성자 : input
+- App.js
+import './App.css';
+import DiaryEditor from './DiaryEditor';
+
+function App() {
+  return (
+    <div className="App">
+      <DiaryEditor/>
+    </div>
+  );
+}
+
+export default App;
+
+사용자의 입력을 리액트에서 처리하기 위해 state 이용하기.
+
+- DiaryEditor.js
+import { useState } from "react";
+
+const DiaryEditor = () => {
+
+    // 작성자 입력
+    const [author, setAuthor] = useState(""); // [state, 상태 변화 주도 함수]
+
+    return (
+        <div className="DiaryEditor">
+            <h2>오늘의 일기</h2>
+            <div>
+                <input
+                    name="author"
+                    value={author}
+                    onChange={(e) => {
+                        console.log(e.target.value);
+                        setAuthor(e.target.value);
+                        console.log(e.target.name);
+                    }}
+                />
+            </div>
+        </div>
+    )
+  
+}
+
+export default DiaryEditor;
+
+useState("") 를 [author, setAuthor] 에 초기화하고 input 태그의 value 로 author 를 설정한 뒤, 화면에서 입력하면 입력이 되지 않는다. input 태그에 변화가 일어날 때 setAuthor 사용하라고 명시하지 않았기 때문에, 자동으로 상태가 변화하지 않아서 "" 공백 문자열이 고정되어 있다.
+input 태그에 값을 입력하면 이벤트가 발생한다. 이 때 이용하고자 하는 이벤트는 onChange 인데, 값이 바뀌었을 때 수행하는 이벤트다. input 값이 바뀔 때, onChange 라는 props 에 전달한 콜백 함수를 실행한다. 매개변수로 e 를 전달하면 이벤트 객체 e 를 전달 받을 수 있다.
+
+(onChange 이벤트의 콜백함수 매개변수로 전달된 이벤트 객체)
+
+이벤트 객체의 target 의 value 를 이용하면, 입력한 값을 onChange 이벤트의 콜백 함수에서 사용할 수 있다. 콜백 함수에서 setAuthor 함수 매개변수로 이벤트 객체의 target 의 value 를 넣어주면, state 를 사용자가 입력한 값으로 업데이트 시키게 되어 입력한 값이 입력된다. 이렇게 리액트에서 state 와 함께 input 을 이용할 수 있게 된다.
+또한 이벤트 객체의 target 의 name 를 이용해, input 태그의 name 속성까지 출력할 수 있다.
+
+2) 일기 본문 : textarea
+- DiaryEditor.js
+import { useState } from "react";
+
+const DiaryEditor = () => {
+
+    // 작성자 입력
+    const [author, setAuthor] = useState(""); // [state, 상태 변화 주도 함수]
+    // 일기 본문 입력
+    const [content, setContent] = useState("");
+
+    return (
+        <div className="DiaryEditor">
+            <h2>오늘의 일기</h2>
+            <div>
+                <input
+                    name="author"
+                    value={author}
+                    onChange={(e) => {
+                        setAuthor(e.target.value);
+                    }}
+                />
+            </div>
+            <div>
+                <textarea
+                    value={content}
+                    onChange={(e) => {
+                        setContent(e.target.value);
+                    }}
+                />
+            </div>
+        </div>
+    )
+  
+}
+
+export default DiaryEditor;
+
+textarea 태그의 값은 content state 가 가진 값으로 고정되어 있는데, textarea 의 값을 입력해 onChange 이벤트가 발생하면 매개변수 콜백 함수가 실행 된다. 콜백 함수의 매개변수로 전달된 이벤트 객체의 target 의 value 를 (state 의 상태변화 함수인) setContent 의 매개변수로 전달해 content state 가 바뀌어서, value 값이 바뀌어 화면에 입력한 대로 반영 된다.
+
+동작이 비슷한 state 2개를 하나의 state 로 묶어줄 수 있다.
+
+- DiaryEditor.js
+import { useState } from "react";
+
+const DiaryEditor = () => {
+
+    // state 기본값 설정
+    const [state, setState] = useState({
+        author: ""
+      , content: ""
+    })
+
+    return (
+        <div className="DiaryEditor">
+            <h2>오늘의 일기</h2>
+            <div>
+                <input
+                    name="author"
+                    value={state.author}
+                    onChange={(e) => {
+                        setState({
+                            author: e.target.value
+                          , content: state.content
+                        });
+                    }}
+                />
+            </div>
+            <div>
+                <textarea
+                    value={state.content}
+                    onChange={(e) => {
+                        setState({
+                            author: state.author
+                          , content: e.target.value
+                        });
+                    }}
+                />
+            </div>
+        </div>
+    )
+  
+}
+
+export default DiaryEditor;
+
+state 기본값을 객체 형태로 초기화 한다. state 의 상태변화 함수의 매개변수도 객체를 변화시켜야 하기 때문에 객체 형태로 전달하는데, author state 를 바꾼다면 content state 는 바뀌면 안되기 때문에, content state 는 기존의 state 로 업데이트하고, author state 는 이벤트 객체의 target 의 value 를 입력하여 state 를 변화시킨다.
+하지만 state 가 많아질수록, state 상태변화 함수의 매개변수로 전달해야 하는 state 들도 많아지기 때문에 ...state 와 같이 Spread 연산자를 사용한다. state 객체가 가지고 있는 프로퍼티들을 펼쳐준다. 따라서 원래 객체들의 값을 객체에 할당할 수 있다.
+
+- DiaryEditor.js
+import { useState } from "react";
+
+const DiaryEditor = () => {
+
+    // state 기본값 설정
+    const [state, setState] = useState({
+        author: ""
+      , content: ""
+    })
+
+    return (
+        <div className="DiaryEditor">
+            <h2>오늘의 일기</h2>
+            <div>
+                <input
+                    name="author"
+                    value={state.author}
+                    onChange={(e) => {
+                        setState({
+                            ...state
+                          , author: e.target.value
+                        });
+                    }}
+                />
+            </div>
+            <div>
+                <textarea
+                    value={state.content}
+                    onChange={(e) => {
+                        setState({
+                            ...state
+                          , content: e.target.value
+                        });
+                    }}
+                />
+            </div>
+        </div>
+    )
+  
+}
+
+export default DiaryEditor;
+
+(state 객체에 Spread 연산자 활용)
+
+먄약 state 상태변화 함수에서 Spread 연산자와 변경하고자 하는 state 의 프로퍼티 값 할당하는 부분의 순서를 바꾸면, 변경사항 위에 다시 Spread 가 펼쳐지면서 기존 값으로 덮어 씌워지게 된다. 따라서 Spread 를 먼저 펼치고 변경사항은 마지막에 작성하도록 순서에 주의하자.
+
+- 좋은 예시
+setState({
+    ...state
+    , author: e.target.value
+});
+
+- 나쁜 예시
+setState({
+    author: e.target.value
+  , ...state
+});
+
+이번엔 이벤트 핸들러도 하나로 합쳐본다.
+
+- DiaryEditor.js
+import { useState } from "react";
+
+const DiaryEditor = () => {
+
+    // state 기본값 설정
+    const [state, setState] = useState({
+        author: ""
+      , content: ""
+    })
+
+    // 이벤트 함수
+    const handleChangeState = (e) => {
+        // console.log(e.target.name);
+        // console.log(e.target.value);
+        setState({
+            ...state
+          , [e.target.name]: e.target.value
+        })
+    }
+
+    return (
+        <div className="DiaryEditor">
+            <h2>오늘의 일기</h2>
+            <div>
+                <input
+                    name="author"
+                    value={state.author}
+                    onChange={handleChangeState}
+                />
+            </div>
+            <div>
+                <textarea
+                    name="content"
+                    value={state.content}
+                    onChange={handleChangeState}
+                />
+            </div>
+        </div>
+    )
+  
+}
+
+export default DiaryEditor;
+
+handleChangeState 함수에 이벤트 객체를 매개변수로 전달받아, state 상태변화 함수에서 spread 연산자와 이벤트 객체의 target 의 name 을 괄호표기법으로 key 값, value 를 값으로 전달받아 state 를 설정한다. 각 태그의 name 속성의 값과 state 프로퍼티 key 값이 같으므로 잘 동작한다.
+
+* 괄호표기법
+{
+    'key': '값'
+    ['key']: '값'
+}
+객체의 key 는 문자열로서 따옴표(" ")가 생략되어 작성이 된다. key 의 자리에 변수 e.target.name 의 값이 들어가므로 '' 표기법은 사용할 수 없으므로, [''] 를 이용하여 작성해야 한다.
+참고링크 :  https://3d-yeju.tistory.com/28
+
+3) 감정 점수 : select
+- DiaryEditor.js
+import { useState } from "react";
+
+const DiaryEditor = () => {
+
+    // state 기본값 설정
+    const [state, setState] = useState({
+        author: ""
+      , content: ""
+      , emotion: 1
+    })
+
+    // 이벤트 함수
+    const handleChangeState = (e) => {
+        // console.log(e.target.name);
+        // console.log(e.target.value);
+        setState({
+            ...state
+          , [e.target.name]: e.target.value
+        })
+    }
+
+    return (
+        <div className="DiaryEditor">
+            <h2>오늘의 일기</h2>
+            <div>
+                <input
+                    name="author"
+                    value={state.author}
+                    onChange={handleChangeState}
+                />
+            </div>
+            <div>
+                <textarea
+                    name="content"
+                    value={state.content}
+                    onChange={handleChangeState}
+                />
+            </div>
+            <div>
+                <select
+                    name="emotion"
+                    value={state.emotion}
+                    onChange={handleChangeState}
+                >
+                    <option value={1}>1</option>
+                    <option value={2}>2</option>
+                    <option value={3}>3</option>
+                    <option value={4}>4</option>
+                    <option value={5}>5</option>
+                </select>
+            </div>
+        </div>
+    )
+  
+}
+
+export default DiaryEditor;
+
+select 태그의 값을 실시간으로 DiaryEditor 컴포넌트가 핸들링하기 위해서 state 프로퍼티에 emotion 추가했다. select 태그에 값을 선택하면 onChange 이벤트가 실행되어 handleChangeState 함수가 실행된다. select 태그의 name 이 'emotion' 으로 state 프로퍼티의 emotion 과 동일하므로, state 상태변화 함수의 [e.target.name] 의 값으로 바뀐 값이 들어가면 state 가 변화되면서 화면에도 반영되어 보이게 된다.
+
+4) 저장 버튼 : button
+- DiaryEditor.js
+import { useState } from "react";
+
+const DiaryEditor = () => {
+
+    // state 기본값 설정
+    const [state, setState] = useState({
+        author: ""
+      , content: ""
+      , emotion: 1
+    })
+
+    // 이벤트 함수
+    const handleChangeState = (e) => {
+        // console.log(e.target.name);
+        // console.log(e.target.value);
+        setState({
+            ...state
+          , [e.target.name]: e.target.value
+        })
+    }
+
+    // 저장 함수
+    const handleSubmit = () => {
+        console.log(state);
+        alert('저장 성공');
+    }
+
+    return (
+        <div className="DiaryEditor">
+            <h2>오늘의 일기</h2>
+            <div>
+                <input
+                    name="author"
+                    value={state.author}
+                    onChange={handleChangeState}
+                />
+            </div>
+            <div>
+                <textarea
+                    name="content"
+                    value={state.content}
+                    onChange={handleChangeState}
+                />
+            </div>
+            <div>
+                <select
+                    name="emotion"
+                    value={state.emotion}
+                    onChange={handleChangeState}
+                >
+                    <option value={1}>1</option>
+                    <option value={2}>2</option>
+                    <option value={3}>3</option>
+                    <option value={4}>4</option>
+                    <option value={5}>5</option>
+                </select>
+            </div>
+            <div>
+                <button onClick={handleSubmit}>일기 저장하기</button>
+            </div>
+        </div>
+    )
+  
+}
+
+export default DiaryEditor;
+
+저장 버튼을 만들어, 3개의 폼에 입력한 값을 state 를 이용해서 잘 활용한 결과를 출력한다.
+
+(state 를 이용한 입력값 활용 결과 화면)
+
+5) 스타일링
+- App.css
+.DiaryEditor {
+    border: 1px solid gray;
+    text-align: center;
+    padding: 20px;
+}
+
+.DiaryEditor input, textarea {
+    margin-bottom: 20px;
+    width: 500px;
+    padding: 10px;
+}
+
+.DiaryEditor textarea {
+    height: 150px;
+}
+
+.DiaryEditor select {
+    margin-bottom: 20px;
+    width: 300px;
+    padding: 10px;
+}
+
+.DiaryEditor button {
+    width: 500px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+App.css 에 굉장히 많은 컴포넌트의 css 가 적힐텐데, 어떤 컴포넌트에 적용될 css 인지 구분하기 위해 최상위 div 태그 className 을 컴포넌트명으로 설정했다.
+전체 컴포넌트 디자인 작업으로, 회색으로 경계선 주고, 글자와 요소들 가운데 정렬, 20px 정도 안쪽으로 요소 밀어넣기.
+내부 세밀한 요소들도 각각 디자인을 적용했다.
+
+(스타일링 적용 결과 화면)
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
