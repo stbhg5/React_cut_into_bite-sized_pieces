@@ -1,0 +1,184 @@
+[2024.01.14 React에서 DOM 조작하기 - useRef]
+
+useRef
+
+1. React에서 DOM 조작하기
+세부 목표)
+- 일기 저장 버튼을 클릭했을 때 작성자와 일기가 정상적으로 입력되었는지 확인하고 아니라면 focus 하기
+
+- 터미널
+npm start
+
+작성자를 1글자 이상 입력하지 않았을 때, 일기 본문을 5글자 이상 입력하지 않았을 때 alert 창 띄우고 함수 강제 종료시키기.
+
+- DiaryEditor.js
+import { useState } from "react";
+
+const DiaryEditor = () => {
+
+    // state 기본값 설정
+    const [state, setState] = useState({
+        author: ""
+      , content: ""
+      , emotion: 1
+    })
+
+    // 이벤트 함수
+    const handleChangeState = (e) => {
+        setState({
+            ...state
+          , [e.target.name]: e.target.value
+        })
+    }
+
+    // 저장 함수
+    const handleSubmit = () => {
+        if (state.author.length < 1) {
+            alert('작성자는 최소 1글자 이상 입력해주세요.');
+            return;
+        }
+        if (state.content.length < 5) {
+            alert('일기 본문은 최소 5글자 이상 입력해주세요.');
+            return;
+        }
+        alert('저장 성공!');
+    }
+
+    return (
+        <div className="DiaryEditor">
+            <h2>오늘의 일기</h2>
+            <div>
+                <input
+                    name="author"
+                    value={state.author}
+                    onChange={handleChangeState}
+                />
+            </div>
+            <div>
+                <textarea
+                    name="content"
+                    value={state.content}
+                    onChange={handleChangeState}
+                />
+            </div>
+            <div>
+                <select
+                    name="emotion"
+                    value={state.emotion}
+                    onChange={handleChangeState}
+                >
+                    <option value={1}>1</option>
+                    <option value={2}>2</option>
+                    <option value={3}>3</option>
+                    <option value={4}>4</option>
+                    <option value={5}>5</option>
+                </select>
+            </div>
+            <div>
+                <button onClick={handleSubmit}>일기 저장하기</button>
+            </div>
+        </div>
+    )
+  
+}
+
+export default DiaryEditor;
+
+(작성자 입력 오류 alert)
+
+(일기 본문 입력 오류 alert)
+
+alert 창을 띄우는 것은 좋은 UX 경험이 아니다. 트렌디하다고 하는 웹사이트들은 alert 를 사용하지 않는다. 입력이 덜 되었다고 판단된 곳에 focus 를 주도록 바꾼다.
+
+- DiaryEditor.js
+import { useState, useRef } from "react";
+
+const DiaryEditor = () => {
+
+    // DOM Element 접근
+    const authorInput = useRef();
+    const contentInput = useRef();
+
+    // state 기본값 설정
+    const [state, setState] = useState({
+        author: ""
+      , content: ""
+      , emotion: 1
+    })
+
+    // 이벤트 함수
+    const handleChangeState = (e) => {
+        setState({
+            ...state
+          , [e.target.name]: e.target.value
+        })
+    }
+
+    // 저장 함수
+    const handleSubmit = () => {
+        if (state.author.length < 1) {
+            // alert('작성자는 최소 1글자 이상 입력해주세요.');
+            // focus
+            authorInput.current.focus();
+            return;
+        }
+        if (state.content.length < 5) {
+            // alert('일기 본문은 최소 5글자 이상 입력해주세요.');
+            // focus
+            contentInput.current.focus();
+            return;
+        }
+        alert('저장 성공!');
+    }
+
+    return (
+        <div className="DiaryEditor">
+            <h2>오늘의 일기</h2>
+            <div>
+                <input
+                    ref={authorInput}
+                    name="author"
+                    value={state.author}
+                    onChange={handleChangeState}
+                />
+            </div>
+            <div>
+                <textarea
+                    ref={contentInput}
+                    name="content"
+                    value={state.content}
+                    onChange={handleChangeState}
+                />
+            </div>
+            <div>
+                <select
+                    name="emotion"
+                    value={state.emotion}
+                    onChange={handleChangeState}
+                >
+                    <option value={1}>1</option>
+                    <option value={2}>2</option>
+                    <option value={3}>3</option>
+                    <option value={4}>4</option>
+                    <option value={5}>5</option>
+                </select>
+            </div>
+            <div>
+                <button onClick={handleSubmit}>일기 저장하기</button>
+            </div>
+        </div>
+    )
+  
+}
+
+export default DiaryEditor;
+
+리액트의 useRef 를 사용하여 DOM Element 에 접근한다. useRef() 함수 반환값으로 React.MutableRefObject<undefined> 가 저장된다. React.MutableRefObject<undefined> 는 HTML DOM 요소에 접근할 수 있는 기능을 한다.
+useRef() 함수 반환값을 저장한 변수 authorInput 를 DOM Element 에 ref 속성값으로 지정하면 DOM Element 에 접근할 수 있다. authorInput.current 를 하면 현재 레퍼런스가 가리키는 곳인 input 태그를 가져오게 된다. 동일하게 textarea 태그도 가져오도록 적용한다.
+
+(작성자 입력 오류 focus)
+
+(일기 본문 입력 오류 focus)
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
