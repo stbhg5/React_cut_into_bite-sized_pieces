@@ -52,5 +52,6 @@
 <p>섹션 5. React 기본 - 간단한 일기장 프로젝트<p/>
     <a href="https://stbhg5.tistory.com/327">프로젝트 소개</a><br/>
     <a href="https://stbhg5.tistory.com/328">React에서 사용자 입력 처리하기</a><br/>
+    <a href="https://stbhg5.tistory.com/329">React에서 DOM 조작하기 - useRef</a><br/>
     <br/>
     
