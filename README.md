@@ -56,5 +56,6 @@
     <a href="https://stbhg5.tistory.com/330">React에서 배열 사용하기 1 - 리스트 렌더링 (조회)</a><br/>
     <a href="https://stbhg5.tistory.com/331">React에서 배열 사용하기 2 - 데이터 추가하기</a><br/>
     <a href="https://stbhg5.tistory.com/332">React에서 배열 사용하기 3 - 데이터 삭제하기</a><br/>
+    <a href="https://stbhg5.tistory.com/333">React에서 배열 사용하기 4 - 데이터 수정하기</a><br/>
     <br/>
     
