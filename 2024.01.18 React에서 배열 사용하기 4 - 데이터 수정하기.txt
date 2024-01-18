@@ -1,0 +1,289 @@
+[2024.01.18 React에서 배열 사용하기 4 - 데이터 수정하기]
+
+UPDATE
+
+1. React에서 리스트 데이터 수정하기
+세부 목표)
+- 배열을 이용한 React 의 List 에 아이템을 동적으로 수정 해보기
+- With 조건부 렌더링
+
+delete 는 취소의 의미이므로, remove 로 함수명을 바꿔본다.
+
+- App.js
+import { useRef, useState } from 'react';
+import './App.css';
+import DiaryEditor from './DiaryEditor';
+import DiaryList from './DiaryList';
+
+// 임시 배열 데이터
+/*
+const dummyList = [
+    {
+        id: 1
+      , author: '송진성'
+      , content: '하이 1'
+      , emotion: 5
+      , created_date: new Date().getTime() // 현재 시간 기준 생성됨, getTime() : 시간을 밀리세컨트로 돌려줌
+    }
+  , {
+        id: 2
+      , author: '홍길동'
+      , content: '하이 2'
+      , emotion: 2
+      , created_date: new Date().getTime()
+    }
+  , {
+        id: 3
+      , author: '아무개'
+      , content: '하이 3'
+      , emotion: 1
+      , created_date: new Date().getTime()
+    }
+]
+*/
+
+function App() {
+
+  const [data, setData] = useState([]); // 빈 배열로 시작 (일기가 없는 상태로 시작)
+
+  const dataId = useRef(0);
+
+  const onCreate = (author, content, emotion) => {
+    const created_date = new Date().getTime();
+    const newItem = {
+      author,
+      content,
+      emotion,
+      created_date,
+      id: dataId.current
+    }
+    dataId.current += 1;
+    setData([newItem, ...data]); // 위에서 부터 출력하기 위해 newItem, ...data 순서로 작성
+  };
+
+  const onRemove = (targetId) => {
+    console.log(`${targetId}가 삭제되었습니다.`);
+    const newDiaryList = data.filter((it) => it.id !== targetId); // targetId 를 포함하지 않은 배열
+    setData(newDiaryList); // 데이터의 state 를 바꿈
+  };
+
+  return (
+    <div className="App">
+      <DiaryEditor onCreate={onCreate}/>
+      <DiaryList diaryList={data} onRemove={onRemove} />
+    </div>
+  );
+}
+
+export default App;
+
+- DiaryList.js
+import DiaryItem from "./DiaryItem";
+
+const DiaryList = ({ diaryList, onRemove }) => {
+    return (
+        <div className="DiaryList">
+            <h2>일기 리스트</h2>
+            <h4>{diaryList.length} 개의 일기가 있습니다.</h4>
+            <div>
+                {diaryList.map((it) => (
+                    <DiaryItem key={it.id} {...it} onRemove={onRemove} />
+                ))}
+            </div>
+        </div>
+    );
+};
+
+DiaryList.defaultProps = {
+    diaryList: []
+}
+
+export default DiaryList;
+
+- DiaryItem.js
+const DiaryItem = ({ author, content, created_date, emotion, id, onRemove }) => {
+    return (
+        <div className="DiaryItem">
+            <div className="info">
+                <span>작성자 : {author} | 감정점수 : {emotion}</span>
+                <br/>
+                <span className="date">{new Date(created_date).toLocaleString()}</span>
+            </div>
+            <div className="content">{content}</div>
+            <button
+                onClick={() => {
+                    console.log(id);
+                    if (window.confirm(`${id} 번째 일기를 정말 삭제하시겠습니까?`)) {
+                        onRemove(id);
+                    }
+                }}
+            >
+                삭제하기
+            </button>
+        </div>
+    );
+};
+
+export default DiaryItem;
+
+컴포넌트 트리의 전역적으로 공급되는 props 이름을 바꾸는데 불편함이 있다.
+DiaryItem.js 에서 수정하기 버튼을 만들고, 삭제하기 버튼의 함수를 바깥으로 뺀다. 테스트를 위해 데이터를 1개 추가한다.
+
+(수정할 데이터 추가)
+
+수정하기 버튼을 누르면, 수정중 state 로 바꿔 입력폼으로 바뀌고 수정 취소와 수정 완료 버튼을 노출시킨다. 수정 취소를 누르면 기존 content 값으로 되돌리고 수정중 state 를 반전시켜 삭제하기와 수정하기 버튼을 노출시킨다. 수정 완료를 누르면 localContent 가 5 글자가 넘는지 검사 후, 부모 컴포넌트의 onEdit 함수를 호출하여 id 와 localContent 을 매개변수로 전달하여 부모의 state 를 변경시킨다.
+
+(수정완료 버튼 클릭 후 confirm 창)
+
+(수정 완료)
+
+- DiaryItem.js
+import { useRef, useState } from "react";
+
+const DiaryItem = ({ author, content, created_date, emotion, id, onRemove, onEdit }) => {
+
+    const [isEdit, setIsEdit] = useState(false); // 수정중인지 판단하는 boolean 저장
+    const toggleIsEdit = () => setIsEdit(!isEdit); // isEdit 값 반전
+    const localContentInput = useRef(); // 포커싱을 위한 DOM 객체
+
+    const [localContent, setLocalContent] = useState(content); // textarea 의 input 을 핸들링 할 state, 수정하기 이전 상태가 초기값
+
+    const handleRemove = () => {
+        if (window.confirm(`${id} 번째 일기를 정말 삭제하시겠습니까?`)) {
+            onRemove(id);
+        }
+    }
+
+    // 수정 취소 시, 기존 content 값 설정 (수정 취소 후 다시 수정하기 눌렀을 때 수정 했던 내용 초기화 위함)
+    const handleQuitEdit = () => {
+        // setIsEdit(false);
+        toggleIsEdit();
+        setLocalContent(content);
+    }
+
+    // 수정 완료 시, 이벤트 처리 함수
+    const handleEdit = () => {
+        if (localContent.length < 5) {
+            localContentInput.current.focus();
+            return;
+        }
+        if (window.confirm(`${id} 번 째 일기를 수정하시겠습니까?`)) {
+            onEdit(id, localContent);
+            toggleIsEdit(); // 수정폼 닫기
+        }
+    }
+
+    return (
+        <div className="DiaryItem">
+            <div className="info">
+                <span>작성자 : {author} | 감정점수 : {emotion}</span>
+                <br/>
+                <span className="date">{new Date(created_date).toLocaleString()}</span>
+            </div>
+            <div className="content">
+                {isEdit ? (
+                    <>
+                        <textarea
+                            ref={localContentInput}
+                            value={localContent}
+                            onChange={(e) => setLocalContent(e.target.value)}
+                        />
+                    </>
+                ) : (
+                    <>{content}</>
+                )}
+            </div>
+            {isEdit ? (
+                <>
+                    <button onClick={handleQuitEdit}>수정 취소</button>
+                    <button onClick={handleEdit}>수정 완료</button>
+                </>
+            ) : (
+                <>
+                    <button onClick={handleRemove}>삭제하기</button>
+                    <button onClick={toggleIsEdit}>수정하기</button>
+                </>
+            )}
+            
+        </div>
+    );
+};
+
+export default DiaryItem;
+
+- App.js
+import { useRef, useState } from 'react';
+import './App.css';
+import DiaryEditor from './DiaryEditor';
+import DiaryList from './DiaryList';
+
+// 임시 배열 데이터
+/*
+const dummyList = [
+    {
+        id: 1
+      , author: '송진성'
+      , content: '하이 1'
+      , emotion: 5
+      , created_date: new Date().getTime() // 현재 시간 기준 생성됨, getTime() : 시간을 밀리세컨트로 돌려줌
+    }
+  , {
+        id: 2
+      , author: '홍길동'
+      , content: '하이 2'
+      , emotion: 2
+      , created_date: new Date().getTime()
+    }
+  , {
+        id: 3
+      , author: '아무개'
+      , content: '하이 3'
+      , emotion: 1
+      , created_date: new Date().getTime()
+    }
+]
+*/
+
+function App() {
+
+  const [data, setData] = useState([]); // 빈 배열로 시작 (일기가 없는 상태로 시작)
+
+  const dataId = useRef(0);
+
+  const onCreate = (author, content, emotion) => {
+    const created_date = new Date().getTime();
+    const newItem = {
+      author,
+      content,
+      emotion,
+      created_date,
+      id: dataId.current
+    }
+    dataId.current += 1;
+    setData([newItem, ...data]); // 위에서 부터 출력하기 위해 newItem, ...data 순서로 작성
+  };
+
+  const onRemove = (targetId) => {
+    console.log(`${targetId}가 삭제되었습니다.`);
+    const newDiaryList = data.filter((it) => it.id !== targetId); // targetId 를 포함하지 않은 배열
+    setData(newDiaryList); // 데이터의 state 를 바꿈
+  };
+
+  const onEdit = (targetId, newContent) => {
+    setData(
+      data.map((it) => it.id === targetId ? { ...it, content: newContent } : it)
+    );
+  };
+
+  return (
+    <div className="App">
+      <DiaryEditor onCreate={onCreate}/>
+      <DiaryList diaryList={data} onRemove={onRemove} onEdit={onEdit} />
+    </div>
+  );
+}
+
+export default App;
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
