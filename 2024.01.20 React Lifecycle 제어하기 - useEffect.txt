@@ -1,0 +1,337 @@
+[2024.01.20 React Lifecycle 제어하기 - useEffect]
+
+useEffect
+
+* Lifecycle = 생애주기
+생애주기란? 일반적으로 시간의 흐름에 따라, 탄생부터 죽음에 이르는 순간에 따른 단계적인 과정 (설명 출처 : 국민 안정처)
+React 컴포넌트도 이런 생명주기 Lifecycle 을 갖는다.
+
+* React 컴포넌트의 생애주기 (생명주기)
+탄생(화면에 나타나는 것) : Mount → 변화(업데이트(리렌더)) : Update → 죽음(화면에서 사라짐) : UnMount
+Task A (ex. 초기화 작업) → Task B (ex. 예외 처리 작업) → Task C (ex. 메모리 정리 작업) => 라이프 사이클을 제어한다(이용한다) : 컴포넌트 생애주기 별로 작업 수행시킬 수 있다.
+
+* React Component Lifecycle Methids
+Mount : ComponentDidMount
+Update : ComponentDidUpdate
+UnMount : ComponentWillUnmount
+→ Class React Component Only : 클래스형 컴포넌트에서만 사용가능(심지어 state 도 사용할 수 없음, 왜냐하면 state 기능도 클래스형 컴포넌트만 이용할 수 있기 때문)
+
+* React Hooks?
+useState, useEffect, useRef 와 같이 use 키워드를 앞에 붙여서 클래스형 컴포넌트가 근본적으로 가지고 기능을 함수형 컴포넌트에서 낚아채서 사용할 수 있는 기능을 React Hooks 라고 한다.
+
+* useEffect?
+React 의 생애주기를 제어하는 메서드를 낚아채는 기능을 가진 React Hooks 이다.
+
+* 왜 클래스형 컴포넌트가 아닌 React Hooks 까지 사용하면서 함수형 컴포넌트를 사용하는가?
+React Hooks 는 2019.06 정식 출시된 기능. Class 형 컴포넌트의 길어지는 코드 길이 문제와 중복 코드, 가독성 문제 등등을 해결하기 위해 등장함.
+
+* useEffect 사용법
+React 의 함수형 컴포넌트에서 Lifecycle 을 제어하기 위해서 useEffect 라는 React Hooks 를 사용해야 한다.
+
+- 예시
+import React, { useEffect } from "react";
+
+useEffect(() => {
+    // todo... → 1번째 파라미터 : Callback 함수
+},
+[] // → 2번째 파라미터 : Dependency Array (의존성 배열) (Depth) : 이 배열 내에 들어있는 값이 변화하면 1번째 파라미터인 Callback 함수가 수행된다.
+);
+
+1. useEffect 사용하여 Lifecycle 제어하기
+- Lifecycle.js
+import React, { useEffect, useState } from 'react';
+
+const Lifecycle = () => {
+
+    const [count, setCount] = useState(0);
+    const [text, setText] = useState('');
+
+    return (
+        <div style={{ padding: 20 }}>
+            <div>
+                {count}
+                <button onClick={() => setCount(count + 1)}>+</button>
+            </div>
+            <div>
+                <input value={text} onChange={(e) => setText(e.target.value)}></input>
+            </div>
+        </div>
+    );
+}
+
+export default Lifecycle;
+
+- App.js
+import { useRef, useState } from 'react';
+import './App.css';
+import DiaryEditor from './DiaryEditor';
+import DiaryList from './DiaryList';
+import Lifecycle from './Lifecycle';
+
+// 임시 배열 데이터
+/*
+const dummyList = [
+    {
+        id: 1
+      , author: '송진성'
+      , content: '하이 1'
+      , emotion: 5
+      , created_date: new Date().getTime() // 현재 시간 기준 생성됨, getTime() : 시간을 밀리세컨트로 돌려줌
+    }
+  , {
+        id: 2
+      , author: '홍길동'
+      , content: '하이 2'
+      , emotion: 2
+      , created_date: new Date().getTime()
+    }
+  , {
+        id: 3
+      , author: '아무개'
+      , content: '하이 3'
+      , emotion: 1
+      , created_date: new Date().getTime()
+    }
+]
+*/
+
+function App() {
+
+  const [data, setData] = useState([]); // 빈 배열로 시작 (일기가 없는 상태로 시작)
+
+  const dataId = useRef(0);
+
+  const onCreate = (author, content, emotion) => {
+    const created_date = new Date().getTime();
+    const newItem = {
+      author,
+      content,
+      emotion,
+      created_date,
+      id: dataId.current
+    }
+    dataId.current += 1;
+    setData([newItem, ...data]); // 위에서 부터 출력하기 위해 newItem, ...data 순서로 작성
+  };
+
+  const onRemove = (targetId) => {
+    console.log(`${targetId}가 삭제되었습니다.`);
+    const newDiaryList = data.filter((it) => it.id !== targetId); // targetId 를 포함하지 않은 배열
+    setData(newDiaryList); // 데이터의 state 를 바꿈
+  };
+
+  const onEdit = (targetId, newContent) => {
+    setData(
+      data.map((it) => it.id === targetId ? { ...it, content: newContent } : it)
+    );
+  };
+
+  return (
+    <div className="App">
+      <Lifecycle />
+      <DiaryEditor onCreate={onCreate}/>
+      <DiaryList diaryList={data} onRemove={onRemove} onEdit={onEdit} />
+    </div>
+  );
+}
+
+export default App;
+
+useEffect 사용하여 Lifecycle 제어 테스트를 할 준비가 완료되었다.
+
+(useEffect 사용하여 Lifecycle 제어 테스트 준비 완료)
+
+컴포넌트가 탄생할 때, 즉 Mount 되는 시점을 제어한다.
+
+- Lifecycle.js
+import React, { useEffect, useState } from 'react';
+
+const Lifecycle = () => {
+
+    const [count, setCount] = useState(0);
+    const [text, setText] = useState('');
+
+    // Mount : Dependency Array 에 빈 배열 전달, Callback 함수에 Todo 작성.
+    useEffect(() => {
+        console.log('Mount!');
+    }, []);
+
+    return (
+        <div style={{ padding: 20 }}>
+            <div>
+                {count}
+                <button onClick={() => setCount(count + 1)}>+</button>
+            </div>
+            <div>
+                <input value={text} onChange={(e) => setText(e.target.value)}></input>
+            </div>
+        </div>
+    );
+}
+
+export default Lifecycle;
+
+Dependency Array 에 빈 배열 전달하고 Callback 함수에 작업할 내용을 작성하면 된다.
+
+(Mount 시점 제어)
+
+컴포넌트가 업데이트될 때, 즉 Update 되는 시점을 제어한다.
+컴포넌트가 업데이트될 때는 state 가 변경되거나, 부모 컴포넌트로 받는 props 가 바뀌거나, 부모 컴포넌트가 리렌더링 될 때 이다.
+
+- Lifecycle.js
+import React, { useEffect, useState } from 'react';
+
+const Lifecycle = () => {
+
+    const [count, setCount] = useState(0);
+    const [text, setText] = useState('');
+
+    // Mount : Dependency Array 에 빈 배열 전달, Callback 에 Todo 작성.
+    useEffect(() => {
+        console.log('Mount!');
+    }, []);
+
+    // Update : Dependency Array 전달하지 않기
+    useEffect(() => {
+        console.log('Update!');
+    });
+
+    return (
+        <div style={{ padding: 20 }}>
+            <div>
+                {count}
+                <button onClick={() => setCount(count + 1)}>+</button>
+            </div>
+            <div>
+                <input value={text} onChange={(e) => setText(e.target.value)}></input>
+            </div>
+        </div>
+    );
+}
+
+export default Lifecycle;
+
+Dependency Array 에 아무것도 전달하지 않으면 된다.
+
+(Update 시점 제어)
+
+useEffect 의 특별한 기능으로, Dependency Array 에 존재하는 state 가 바뀔때마다 시행되도록 제어한다.
+
+- Lifecycle.js
+import React, { useEffect, useState } from 'react';
+
+const Lifecycle = () => {
+
+    const [count, setCount] = useState(0);
+    const [text, setText] = useState('');
+
+    // Mount : Dependency Array 에 빈 배열 전달, Callback 에 Todo 작성.
+    useEffect(() => {
+        console.log('Mount!');
+    }, []);
+
+    // Update : Dependency Array 전달하지 않기
+    useEffect(() => {
+        console.log('Update!');
+    });
+
+    // state 가 바뀔때마다 시행
+    useEffect(() => {
+        console.log(`count is update : ${count}`);
+    }, [count]);
+    useEffect(() => {
+        console.log(`text is update : ${text}`);
+    }, [text]);
+
+    return (
+        <div style={{ padding: 20 }}>
+            <div>
+                {count}
+                <button onClick={() => setCount(count + 1)}>+</button>
+            </div>
+            <div>
+                <input value={text} onChange={(e) => setText(e.target.value)}></input>
+            </div>
+        </div>
+    );
+}
+
+export default Lifecycle;
+
+Dependency Array 를 잘 활용하면, 감지하고 싶은 값만 감지하여 그 값이 변하는 순간에만 Callback 함수를 수행시키도록 바꿀 수 있다.
+
+(Dependency Array 의 state 가 바뀔때마다 시행되도록 제어)
+
+컴포넌트가 화면에서 사라지게 될 때, 즉 UnMount 되는 시점을 제어한다.
+
+- Lifecycle.js
+import React, { useEffect, useState } from 'react';
+
+const UnmountTest = () => {
+
+    useEffect(() => {
+        console.log('UnmountTest Mount!');
+        return () => {
+            // Unmount 시점에 실행되게 됨
+            console.log('UnmountTest UnMount!');
+        };
+    }, []);
+
+    return <div>Unmount Testing Component</div>;
+
+};
+
+const Lifecycle = () => {
+
+    const [count, setCount] = useState(0);
+    const [text, setText] = useState('');
+    const [isVisible, setIsVisible] = useState(false);
+    const toggle = () => setIsVisible(!isVisible);
+
+    // Mount : Dependency Array 에 빈 배열 전달, Callback 에 Todo 작성.
+    useEffect(() => {
+        console.log('Mount!');
+    }, []);
+
+    // Update : Dependency Array 전달하지 않기
+    useEffect(() => {
+        console.log('Update!');
+    });
+
+    // state 가 바뀔때마다 시행
+    useEffect(() => {
+        console.log(`count is update : ${count}`);
+        if (count > 5) {
+            alert('count가 5를 넘었습니다. 따라서 1로 초기화 합니다.');
+            setCount(1);
+        }
+    }, [count]);
+    useEffect(() => {
+        console.log(`text is update : ${text}`);
+    }, [text]);
+
+    return (
+        <div style={{ padding: 20 }}>
+            <div>
+                {count}
+                <button onClick={() => setCount(count + 1)}>+</button>
+            </div>
+            <div>
+                <input value={text} onChange={(e) => setText(e.target.value)}></input>
+            </div>
+            <div>
+                <button onClick={toggle}>ON / OFF</button>
+                {isVisible && <UnmountTest />} {/* 단락회로평가 */}
+            </div>
+        </div>
+    );
+}
+
+export default Lifecycle;
+
+useEffect 의 Callback 함수에서 함수 하나를 return 하면된다. 이 return 되는 함수가 UnMount 시점에 시행되게 된다.
+
+(UnMount 시점 제어)
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
