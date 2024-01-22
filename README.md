@@ -59,5 +59,6 @@
     <a href="https://stbhg5.tistory.com/333">React에서 배열 사용하기 4 - 데이터 수정하기</a><br/>
     <a href="https://stbhg5.tistory.com/334">React Lifecycle 제어하기 - useEffect</a><br/>
     <a href="https://stbhg5.tistory.com/335">React에서 API 호출하기</a><br/>
+    <a href="https://stbhg5.tistory.com/336">React developer tools</a><br/>
     <br/>
 
