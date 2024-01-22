@@ -1,0 +1,14 @@
+[2024.01.22 React developer tools]
+
+RDT
+
+구글 검색창에 '크롬 웹 스토어' 검색. 크롬 웹 스토어에서 'react developer tools' 검색 후 첫 번째에 뜨는 것으로 들어간다. 이후 'Chrome에 추가' 버튼을 클릭하여 설치한다.
+이후 메뉴 - 확장 프로그램 - 확장 프로그램 관리 - React Developer Tools 체크 확인 - 세부정보 - 사이트 액세스 : 모든 사이트에서, 파일 URL에 대한 액세스 허용 : 체크
+vscode 에 접속하여 simple_diary 폴더를 연 뒤에 터미널에서 'npm start' 한다.
+화면이 뜨게되면 오른쪽 상단 확장 프로그램을 클릭하면 주황색 아이콘의 React Developer Tools 를 확인할 수 있다. 이후 개발자 도구를 실행하면 React Developer Tools 가 제공하는 Components, Profiler 메뉴를 확인할 수 있다.
+Components 탭을 클릭하면 simple_diary 프로젝트의 컴포넌트 계층구조를 보여준다. App 컴포넌트를 클릭하면 어떤 state 를 가지고 있고, 어떤 레퍼런스를 가지고 있고, 어떤 useEffect 를 가지고 있는지 보여준다. DiaryEditor 컴포넌트를 클릭하면 어떤 props 를 받았는지도 나오고, DiaryList 컴포넌트를 클릭하면 마찬가지로 어떤 props 를 받고, 어떤 props 는 함수인 것을 보여준다. 놀라운건 리스트로 랜더링 한 DiaryItem 의 key 값까지 잘 나온다. 즉, 컴포넌트 계층구조와 각각의 컴포넌트가 어떤 데이터와 props, state 를 가지고 있는지 보여준다.
+톱니 모양의 아이콘인 View settings 를 클릭한 뒤, General 탭에서 'Highlight updates when components render.' 를 체크한다. 이후 DiaryEditor 컴포넌트에서 작성자나 일기 본문을 입력하면 노란색 테두리가 보여진다. DiaryEditor 컴포넌트가 리렌더 되는 것을 보여주는 것이다.
+또한 DiaryEditor 컴포넌트에서 작성자나 일기 본문을 입력하면 개발자 도구의 Components 탭에서 실시간으로 state 가 바뀌는 것도 확인할 수 있다.
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
