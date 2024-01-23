@@ -1,0 +1,270 @@
+[2024.01.23 최적화 1 - useMemo]
+
+useMemo
+
+1. 연산 결과값을 재사용 하는 방법
+세부 목표)
+- 현재 일기 데이터를 분석하는 함수를 제작하고 해당 함수가 일기 데이터의 길이가 변화하지 않을 때 값을 다시 계산하지 않도록 하기 + Memoization 이해하기
+
+* Memoization
+이미 계산해 본 연산 결과를 기억해 두었다가 동일한 계산을 시키면, 다시 연산하지 않고 기억해 두었던 데이터를 반환시키게 하는 방법(Memoization 을 이용한 연산 과정 최적화).
+마치 시험을 볼 때, 이미 풀어본 문제는 다시 풀어보지 않아도 답을 알고 있는 것과 유사함.
+
+App 컴포넌트의 data state 가 가지고 있는 일기 data 중, 기분이 좋은 일기가 몇 개 있는지, 기분이 안좋은 일기는 몇 개 있는지, 기분의 좋은 일기의 비율은 어떻게 되는지, 이 3가지 데이터를 구하는 함수를 만들어 본다.
+
+- App.js
+import { useEffect, useRef, useState } from 'react';
+import './App.css';
+import DiaryEditor from './DiaryEditor';
+import DiaryList from './DiaryList';
+// import Lifecycle from './Lifecycle';
+
+// 임시 배열 데이터
+/*
+const dummyList = [
+    {
+        id: 1
+      , author: '송진성'
+      , content: '하이 1'
+      , emotion: 5
+      , created_date: new Date().getTime() // 현재 시간 기준 생성됨, getTime() : 시간을 밀리세컨트로 돌려줌
+    }
+  , {
+        id: 2
+      , author: '홍길동'
+      , content: '하이 2'
+      , emotion: 2
+      , created_date: new Date().getTime()
+    }
+  , {
+        id: 3
+      , author: '아무개'
+      , content: '하이 3'
+      , emotion: 1
+      , created_date: new Date().getTime()
+    }
+]
+*/
+
+// API 링크 : https://jsonplaceholder.typicode.com/comments
+
+function App() {
+
+  const [data, setData] = useState([]); // 빈 배열로 시작 (일기가 없는 상태로 시작)
+
+  const dataId = useRef(0);
+
+  // API 호출하여 JSON 데이터 가져와 초기값 설정
+  const getData = async() => {
+    const res = await fetch('https://jsonplaceholder.typicode.com/comments').then((res) => res.json());
+    // 0~19 인덱스까지 자르고, 데이터를 하나씩 순회하여 return 되는 객체 모아서 배열 만듦
+    const initData = res.slice(0, 20).map((it) => {
+      return {
+        author: it.email,
+        content: it.body,
+        emotion: Math.floor(Math.random() * 5) + 1, // 0~4 까지 랜덤 난수 생성 후 정수로 형변환(소수점 버림) + 1
+        created_data: new Date().getTime(), // 현재시간으로 생성 후 밀리세컨드로 바꿈
+        id: dataId.current++ // 후위연산자
+      }
+    });
+    setData(initData);
+  }
+
+  // Mount
+  useEffect(() => {
+    getData();
+  }, []);
+
+  const onCreate = (author, content, emotion) => {
+    const created_date = new Date().getTime();
+    const newItem = {
+      author,
+      content,
+      emotion,
+      created_date,
+      id: dataId.current
+    }
+    dataId.current += 1;
+    setData([newItem, ...data]); // 위에서 부터 출력하기 위해 newItem, ...data 순서로 작성
+  };
+
+  const onRemove = (targetId) => {
+    console.log(`${targetId}가 삭제되었습니다.`);
+    const newDiaryList = data.filter((it) => it.id !== targetId); // targetId 를 포함하지 않은 배열
+    setData(newDiaryList); // 데이터의 state 를 바꿈
+  };
+
+  const onEdit = (targetId, newContent) => {
+    setData(
+      data.map((it) => it.id === targetId ? { ...it, content: newContent } : it)
+    );
+  };
+
+  // 일기 기분 분석 함수
+  const getDiaryAnalysis = () => {
+    console.log('일기 분석 시작');
+    const goodCount = data.filter((it) => it.emotion >= 3).length; // 기분 좋은 일기 개수
+    const badCount = data.length - goodCount; // 기분 나쁜 일기 개수
+    const goodRatio = (goodCount / data.length) * 100; // 기분 좋은 일기 비율
+    return { goodCount, badCount, goodRatio };
+  }
+
+  // 비 구조화 할당으로 결과값 할당
+  const { goodCount, badCount, goodRatio } = getDiaryAnalysis();
+
+  return (
+    <div className="App">
+      {/* <Lifecycle /> */}
+      <DiaryEditor onCreate={onCreate}/>
+      <div>전체 일기 : {data.length}</div>
+      <div>기분 좋은 일기 개수 : {goodCount}</div>
+      <div>기분 나쁜 일기 개수 : {badCount}</div>
+      <div>기분 좋은 일기 비율 : {goodRatio}</div>
+      <DiaryList diaryList={data} onRemove={onRemove} onEdit={onEdit} />
+    </div>
+  );
+}
+
+export default App;
+
+(일기 기분 분석 함수 결과)
+
+일기 기분 분석 함수가 2번 실행되는데, App 컴포넌트가 처음 마운트 될 때 data state 값이 빈 배열일 때 한 번 호출되고, getData() 함수가 호출되고 API 가 호출되어 setData() 함수가 호출될 때 data state 가 바뀌면서 App 컴포넌트에 리렌더가 일어나며 모든 함수가 재생성 될 때 getDiaryAnalysis() 함수가 다시 호출되게 된다(리렌더링이란 App 컴포넌트(함수)가 다시 한 번 호출되는 것).
+일기 데이터중 하나를 수정하면 다시 리렌더 되어 getDiaryAnalysis() 함수가 호출되는데, 이건 낭비이다. 왜냐하면 일기 본문만 수정되고 감정점수는 바뀌지 않기 때문에, 일기 기분 분석 함수를 다시 실행할 필요가 없기 때문이다.
+이 때, Memoization 기법을 이용할 수가 있다. React 의 userMemo() 함수를 이용한다. 사용법은 첫 번째 인자로 Memoization 하고싶은 함수를 넣고(함수가 return 하는 값, 즉 연산을 최적화 하도록 하는 기능이다), 두 번째로 Dependency Array 를 넣어준다. Dependency Array 에 담긴 값이 변화할 때만, 첫 번째 인자의 Callback 함수가 다시 수행된다. 따라서 userMemo() 함수가 호출되어도 Dependency Array 에 담긴 값이 변화하지 않으면 똑같은 return 을 계산하지 않고 반환한다.
+
+- useMemo() 함수 사용 예시
+// 일기 기분 분석 함수
+const getDiaryAnalysis = useMemo(() => {
+  console.log('일기 분석 시작');
+  const goodCount = data.filter((it) => it.emotion >= 3).length; // 기분 좋은 일기 개수
+  const badCount = data.length - goodCount; // 기분 나쁜 일기 개수
+  const goodRatio = (goodCount / data.length) * 100; // 기분 좋은 일기 비율
+  return { goodCount, badCount, goodRatio };
+}, [data.length]);
+
+// 비 구조화 할당으로 결과값 할당
+const { goodCount, badCount, goodRatio } = getDiaryAnalysis();
+
+이대로 저장하면, 'getDiaryAnalysis is not a function' 이라는 에러가 발생한다. useMemo() 함수를 사용하면, 첫 번째 인자의 Callback 함수가 return 하는 값을 그대로 return 하기 때문이다. 따라서 getDiaryAnalysis() 함수 호출이 아닌, getDiaryAnalysis 값으로 사용해야 한다.
+일기 데이터중 하나를 수정하고 개발자 도구 콘솔을 보면 '일기 분석 시작' 이 다시 호출되지 않는 것을 볼 수 있다. 일기 데이터중 하나를 삭제하여 data.length 에 변화를 주고 개발자 콘솔을 보면 '일기 분석 시작' 이 호출된 것을 볼 수 있다.
+
+(useMemo() 함수 활용 결과)
+
+- App.js
+import { useEffect, useMemo, useRef, useState } from 'react';
+import './App.css';
+import DiaryEditor from './DiaryEditor';
+import DiaryList from './DiaryList';
+// import Lifecycle from './Lifecycle';
+
+// 임시 배열 데이터
+/*
+const dummyList = [
+    {
+        id: 1
+      , author: '송진성'
+      , content: '하이 1'
+      , emotion: 5
+      , created_date: new Date().getTime() // 현재 시간 기준 생성됨, getTime() : 시간을 밀리세컨트로 돌려줌
+    }
+  , {
+        id: 2
+      , author: '홍길동'
+      , content: '하이 2'
+      , emotion: 2
+      , created_date: new Date().getTime()
+    }
+  , {
+        id: 3
+      , author: '아무개'
+      , content: '하이 3'
+      , emotion: 1
+      , created_date: new Date().getTime()
+    }
+]
+*/
+
+// API 링크 : https://jsonplaceholder.typicode.com/comments
+
+function App() {
+
+  const [data, setData] = useState([]); // 빈 배열로 시작 (일기가 없는 상태로 시작)
+
+  const dataId = useRef(0);
+
+  // API 호출하여 JSON 데이터 가져와 초기값 설정
+  const getData = async() => {
+    const res = await fetch('https://jsonplaceholder.typicode.com/comments').then((res) => res.json());
+    // 0~19 인덱스까지 자르고, 데이터를 하나씩 순회하여 return 되는 객체 모아서 배열 만듦
+    const initData = res.slice(0, 20).map((it) => {
+      return {
+        author: it.email,
+        content: it.body,
+        emotion: Math.floor(Math.random() * 5) + 1, // 0~4 까지 랜덤 난수 생성 후 정수로 형변환(소수점 버림) + 1
+        created_data: new Date().getTime(), // 현재시간으로 생성 후 밀리세컨드로 바꿈
+        id: dataId.current++ // 후위연산자
+      }
+    });
+    setData(initData);
+  }
+
+  // Mount
+  useEffect(() => {
+    getData();
+  }, []);
+
+  const onCreate = (author, content, emotion) => {
+    const created_date = new Date().getTime();
+    const newItem = {
+      author,
+      content,
+      emotion,
+      created_date,
+      id: dataId.current
+    }
+    dataId.current += 1;
+    setData([newItem, ...data]); // 위에서 부터 출력하기 위해 newItem, ...data 순서로 작성
+  };
+
+  const onRemove = (targetId) => {
+    console.log(`${targetId}가 삭제되었습니다.`);
+    const newDiaryList = data.filter((it) => it.id !== targetId); // targetId 를 포함하지 않은 배열
+    setData(newDiaryList); // 데이터의 state 를 바꿈
+  };
+
+  const onEdit = (targetId, newContent) => {
+    setData(
+      data.map((it) => it.id === targetId ? { ...it, content: newContent } : it)
+    );
+  };
+
+  // 일기 기분 분석 함수
+  const getDiaryAnalysis = useMemo(() => {
+    console.log('일기 분석 시작');
+    const goodCount = data.filter((it) => it.emotion >= 3).length; // 기분 좋은 일기 개수
+    const badCount = data.length - goodCount; // 기분 나쁜 일기 개수
+    const goodRatio = (goodCount / data.length) * 100; // 기분 좋은 일기 비율
+    return { goodCount, badCount, goodRatio };
+  }, [data.length]);
+
+  // 비 구조화 할당으로 결과값 할당
+  const { goodCount, badCount, goodRatio } = getDiaryAnalysis;
+
+  return (
+    <div className="App">
+      {/* <Lifecycle /> */}
+      <DiaryEditor onCreate={onCreate}/>
+      <div>전체 일기 : {data.length}</div>
+      <div>기분 좋은 일기 개수 : {goodCount}</div>
+      <div>기분 나쁜 일기 개수 : {badCount}</div>
+      <div>기분 좋은 일기 비율 : {goodRatio}</div>
+      <DiaryList diaryList={data} onRemove={onRemove} onEdit={onEdit} />
+    </div>
+  );
+}
+
+export default App;
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
