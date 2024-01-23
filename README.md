@@ -60,5 +60,6 @@
     <a href="https://stbhg5.tistory.com/334">React Lifecycle 제어하기 - useEffect</a><br/>
     <a href="https://stbhg5.tistory.com/335">React에서 API 호출하기</a><br/>
     <a href="https://stbhg5.tistory.com/336">React developer tools</a><br/>
+    <a href="https://stbhg5.tistory.com/337">최적화 1 - useMemo</a><br/>
     <br/>
 
