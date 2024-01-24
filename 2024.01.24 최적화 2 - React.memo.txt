@@ -1,0 +1,373 @@
+[2024.01.24 최적화 2 - React.memo]
+
+React.memo
+
+1. 컴포넌트 재사용
+React.memo : 함수형 컴포넌트에게 업데이트 조건을 걸자(업데이트 조건을 걸어 조건을 만족한 경우에만 컴포넌트가 렌더링 되도록 하여 연산의 낭비를 막아 성능을 지킴)
+
+* 리액트에 대한 여러가지 기능을 알아보기 위한 가장 좋은 방법은 공식 문서 보기. (구글에 'react docs' 검색 - https://ko.legacy.reactjs.org/docs/getting-started.html)
+참고 링크 : https://ko.legacy.reactjs.org/
+
+React.memo 를 리액트 공식 문서를 통해 확인한다.
+참고 링크 : https://ko.legacy.reactjs.org/docs/react-api.html#reactmemo
+
+React.memo() 고차 컴포넌트로 리렌더링 되지 않았으면 하는 컴포넌트를 감싸주면, props 가 바뀌지 않으면 리렌더링 하지 않는 강화된 컴포넌트를 돌려준다. 물론 자기 자신의 state 가 바뀌면 리렌더링 된다.
+컴포넌트 재사용 실습용 컴포넌트 OptimizeTest 를 만들고 App 컴포넌트에 등록한다.
+
+- OptimizeTest.js
+import React, { useState, useEffect } from "react";
+
+// 자식 컴포넌트1
+const CountView = ({ count }) => {
+    useEffect(() => {
+        console.log(`Update :: Count : ${count}`);
+    });
+    return <div>{count}</div>
+}
+
+// 자식 컴포넌트2
+const TextView = ({ text }) => {
+    useEffect(() => {
+        console.log(`Update :: Text : ${text}`);
+    })
+    return <div>{text}</div>
+}
+
+const OptimizeTest = () => {
+
+    const [count, setCount] = useState(1);
+    const [text, setText] = useState('');
+
+    return (
+        <div style={{ padding: 50 }}>
+            <div>
+                <h2>count</h2>
+                <CountView count={count} />
+                <button onClick={() => setCount(count + 1)}>+</button>
+            </div>
+            <div>
+                <h2>text</h2>
+                <TextView text={text} />
+                <input value={text} onChange={(e) => setText(e.target.value)} />
+            </div>
+        </div>
+    );
+
+};
+
+export default OptimizeTest;
+
+- App.js
+import { useEffect, useMemo, useRef, useState } from 'react';
+import './App.css';
+import DiaryEditor from './DiaryEditor';
+import DiaryList from './DiaryList';
+// import Lifecycle from './Lifecycle';
+import OptimizeTest from './OptimizeTest';
+
+// 임시 배열 데이터
+/*
+const dummyList = [
+    {
+        id: 1
+      , author: '송진성'
+      , content: '하이 1'
+      , emotion: 5
+      , created_date: new Date().getTime() // 현재 시간 기준 생성됨, getTime() : 시간을 밀리세컨트로 돌려줌
+    }
+  , {
+        id: 2
+      , author: '홍길동'
+      , content: '하이 2'
+      , emotion: 2
+      , created_date: new Date().getTime()
+    }
+  , {
+        id: 3
+      , author: '아무개'
+      , content: '하이 3'
+      , emotion: 1
+      , created_date: new Date().getTime()
+    }
+]
+*/
+
+// API 링크 : https://jsonplaceholder.typicode.com/comments
+
+function App() {
+
+  const [data, setData] = useState([]); // 빈 배열로 시작 (일기가 없는 상태로 시작)
+
+  const dataId = useRef(0);
+
+  // API 호출하여 JSON 데이터 가져와 초기값 설정
+  const getData = async() => {
+    const res = await fetch('https://jsonplaceholder.typicode.com/comments').then((res) => res.json());
+    // 0~19 인덱스까지 자르고, 데이터를 하나씩 순회하여 return 되는 객체 모아서 배열 만듦
+    const initData = res.slice(0, 20).map((it) => {
+      return {
+        author: it.email,
+        content: it.body,
+        emotion: Math.floor(Math.random() * 5) + 1, // 0~4 까지 랜덤 난수 생성 후 정수로 형변환(소수점 버림) + 1
+        created_data: new Date().getTime(), // 현재시간으로 생성 후 밀리세컨드로 바꿈
+        id: dataId.current++ // 후위연산자
+      }
+    });
+    setData(initData);
+  }
+
+  // Mount
+  useEffect(() => {
+    getData();
+  }, []);
+
+  const onCreate = (author, content, emotion) => {
+    const created_date = new Date().getTime();
+    const newItem = {
+      author,
+      content,
+      emotion,
+      created_date,
+      id: dataId.current
+    }
+    dataId.current += 1;
+    setData([newItem, ...data]); // 위에서 부터 출력하기 위해 newItem, ...data 순서로 작성
+  };
+
+  const onRemove = (targetId) => {
+    // console.log(`${targetId}가 삭제되었습니다.`);
+    const newDiaryList = data.filter((it) => it.id !== targetId); // targetId 를 포함하지 않은 배열
+    setData(newDiaryList); // 데이터의 state 를 바꿈
+  };
+
+  const onEdit = (targetId, newContent) => {
+    setData(
+      data.map((it) => it.id === targetId ? { ...it, content: newContent } : it)
+    );
+  };
+
+  // 일기 기분 분석 함수
+  const getDiaryAnalysis = useMemo(() => {
+    // console.log('일기 분석 시작');
+    const goodCount = data.filter((it) => it.emotion >= 3).length; // 기분 좋은 일기 개수
+    const badCount = data.length - goodCount; // 기분 나쁜 일기 개수
+    const goodRatio = (goodCount / data.length) * 100; // 기분 좋은 일기 비율
+    return { goodCount, badCount, goodRatio };
+  }, [data.length]);
+
+  // 비 구조화 할당으로 결과값 할당
+  const { goodCount, badCount, goodRatio } = getDiaryAnalysis;
+
+  return (
+    <div className="App">
+      {/* <Lifecycle /> */}
+      <OptimizeTest />
+      <DiaryEditor onCreate={onCreate}/>
+      <div>전체 일기 : {data.length}</div>
+      <div>기분 좋은 일기 개수 : {goodCount}</div>
+      <div>기분 나쁜 일기 개수 : {badCount}</div>
+      <div>기분 좋은 일기 비율 : {goodRatio}</div>
+      <DiaryList diaryList={data} onRemove={onRemove} onEdit={onEdit} />
+    </div>
+  );
+}
+
+export default App;
+
+OptimizeTest 컴포넌트에 자식 컴포넌트 CountView 와 TextView 를 만들어 각각 props 를 전달한다. 부모 컴포넌트의 state 가 바뀔때마다 두 컴포넌트가 리렌더 된다.
+
+(부모 컴포넌트 state 가 바뀔 때마다 리렌더되는 두 컴포넌트)
+
+컴포넌트를 재사용할 수 있는 React.memo 고차 컴포넌트를 사용하여 자신에게 전달되는 props 가 바뀌지 않으면 리렌더 되지 않도록 하여, 쓸 때 없이 리렌더되는 자원 낭비를 막아본다.
+
+- OptimizeTest.js
+import React, { useState, useEffect } from "react";
+
+// 자식 컴포넌트1
+const CountView = React.memo(({ count }) => {
+    useEffect(() => {
+        console.log(`Update :: Count : ${count}`);
+    });
+    return <div>{count}</div>
+});
+
+// 자식 컴포넌트2
+const TextView = React.memo(({ text }) => {
+    useEffect(() => {
+        console.log(`Update :: Text : ${text}`);
+    })
+    return <div>{text}</div>
+});
+
+const OptimizeTest = () => {
+
+    const [count, setCount] = useState(1);
+    const [text, setText] = useState('');
+
+    return (
+        <div style={{ padding: 50 }}>
+            <div>
+                <h2>count</h2>
+                <CountView count={count} />
+                <button onClick={() => setCount(count + 1)}>+</button>
+            </div>
+            <div>
+                <h2>text</h2>
+                <TextView text={text} />
+                <input value={text} onChange={(e) => setText(e.target.value)} />
+            </div>
+        </div>
+    );
+
+};
+
+export default OptimizeTest;
+
+(React.memo 사용하여 강화된 컴포넌트로 바꾸기)
+
+또 다른 React.memo() 를 활용한 예제를 실행해본다.
+
+- OptimizeTest.js
+import React, { useState, useEffect } from "react";
+
+// 자식 컴포넌트1
+const CounterA = React.memo(({ count }) => {
+    useEffect(() => {
+        console.log(`CounterA Update - count: ${count}`);
+    })
+    return <div>{count}</div>;
+});
+
+// 자식 컴포넌트2
+const CounterB = React.memo(({ obj }) => {
+    useEffect(() => {
+        console.log(`CounterB Update - count: ${obj.count}`);
+    })
+    return <div>{obj.count}</div>
+});
+
+const OptimizeTest = () => {
+
+    const [count, setCount] = useState(1);
+    const [obj, setObj] = useState({
+        count: 1
+    });
+
+    return (
+        <div style={{ padding: 50 }}>
+            <div>
+                <h2>Counter A</h2>
+                <CounterA count={count} />
+                <button onClick={() => setCount(count)}>A button</button>
+            </div>
+            <div>
+                <h2>Counter B</h2>
+                <CounterB obj={obj} />
+                <button
+                    onClick={() => setObj({
+                        count: obj.count
+                    })}
+                >B button</button>
+            </div>
+        </div>
+    );
+
+};
+
+export default OptimizeTest;
+
+A button 을 클릭하면 state 가 바뀌지 않아 CounterA 는 리렌더 되지 않는다. 마찬가지로 B button 을 클릭하면 리렌더가 안될 것 같지만 리렌더가 되고 있다.
+React.memo 에 이상이 있는것 같지만 정확하게 동작한 것이다. 이런 문제가 일어나는 이유는 props 인 obj 가 객체이기 때문인데, 자바스크립트는 기본적으로 객체 비교시 얕은 비교를 하기 때문이다.
+
+(두 컴포넌트 리렌더 비교 - props 가 숫자형 vs 객체)
+
+* 객체를 비교하는 방법
+- 예시1
+let a = { count: 1 }; // 고유한 메모리 주소값 : 13FXDE
+let b = { count: 1 }; // 고유한 메모리 주소값 : 9EA21V
+if (a === b) {
+    console.log('EQUAL');
+} else {
+    console.log('NOT EQUAL');
+}
+- 결과 : NOT EQUAL (객체의 주소에 의한 비교는 얕은 비교 - 두 개의 객체가 같은 주소인지 비교)
+
+- 예시2
+let a = { count: 1 };
+let b = a;
+if (a === b) {
+    console.log('EQUAL');
+} else {
+    console.log('NOT EQUAL');
+}
+- 결과 : EQUAL (메모리 주소가 같다)
+
+자바스크립트가 객체나 함수, 배열 같은 비원시타입 자료형 비교시, 값에 의한 비교가 아닌 주소에 의한 비교인 얕은 비교를 한다.
+따라서 React.memo 의 두 번째 인자로 별도의 비교 함수를 사용하여, 얕은 비교를 하게하지 않고 깊은 비교를 하도록 구현하여 렌더링 최적화를 이뤄낸다.
+
+- OptimizeTest.js
+import React, { useState, useEffect } from "react";
+
+// 자식 컴포넌트1
+const CounterA = React.memo(({ count }) => {
+    useEffect(() => {
+        console.log(`CounterA Update - count: ${count}`);
+    })
+    return <div>{count}</div>;
+});
+
+// 자식 컴포넌트2
+const CounterB = ({ obj }) => {
+    useEffect(() => {
+        console.log(`CounterB Update - count: ${obj.count}`);
+    })
+    return <div>{obj.count}</div>
+};
+
+// 객체의 깊은 비교
+const areEqual = (prevProps, nextProps) => {
+    if (prevProps.obj.count === nextProps.obj.count) { // 각 객체의 count 비교
+        return true; // 이전 props 와 현재 props 가 같다 : 리렌더링X
+    } else {
+        return false; // 이전 props 와 현재 props 가 다르다 : 리렌더링O
+    }
+    // return prevProps.obj.count === nextProps.obj.count;
+}
+
+// 고차 컴포넌트
+const MemoizedCounterB = React.memo(CounterB, areEqual);
+
+const OptimizeTest = () => {
+
+    const [count, setCount] = useState(1);
+    const [obj, setObj] = useState({
+        count: 1
+    });
+
+    return (
+        <div style={{ padding: 50 }}>
+            <div>
+                <h2>Counter A</h2>
+                <CounterA count={count} />
+                <button onClick={() => setCount(count)}>A button</button>
+            </div>
+            <div>
+                <h2>Counter B</h2>
+                <MemoizedCounterB obj={obj} />
+                <button
+                    onClick={() => setObj({
+                        count: obj.count
+                    })}
+                >B button</button>
+            </div>
+        </div>
+    );
+
+};
+
+export default OptimizeTest;
+
+(React.memo 두번 째 인자 활용한 렌더링 최적화 결과)
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
