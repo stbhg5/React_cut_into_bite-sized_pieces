@@ -62,5 +62,6 @@
     <a href="https://stbhg5.tistory.com/336">React developer tools</a><br/>
     <a href="https://stbhg5.tistory.com/337">최적화 1 - useMemo</a><br/>
     <a href="https://stbhg5.tistory.com/338">최적화 2 - React.memo</a><br/>
+    <a href="https://stbhg5.tistory.com/339">최적화 3 - useCallback</a><br/>
     <br/>
 
