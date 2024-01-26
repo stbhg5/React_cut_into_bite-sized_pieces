@@ -1,0 +1,117 @@
+[2024.01.26 최적화 4 - 최적화 완성]
+
+프로젝트 최적화 완료
+
+1. 최적화 완성
+DiaryItem 컴포넌트에 최적화를 적용한다. 이 컴포넌트엔 심각한 문제가 하나 있는데, 일기 하나만 삭제해도 모든 일기에 리렌더링이 일어나고 있는 것이다. DiaryItem 컴포넌트의 props 중 content, onRemove, onEdit 에 집중하여 최적화 한다.
+
+- DiaryItem.js
+import React, { useEffect, useRef, useState } from "react";
+
+const DiaryItem = ({ author, content, created_date, emotion, id, onRemove, onEdit }) => {
+
+    // 어떤 아이템에 리렌더링이 일어나는지 확인
+    useEffect(() => {
+        console.log(`${id} 번 째 아이템 렌더!`);
+    });
+
+    const [isEdit, setIsEdit] = useState(false); // 수정중인지 판단하는 boolean 저장
+    const toggleIsEdit = () => setIsEdit(!isEdit); // isEdit 값 반전
+    const localContentInput = useRef(); // 포커싱을 위한 DOM 객체
+
+    const [localContent, setLocalContent] = useState(content); // textarea 의 input 을 핸들링 할 state, 수정하기 이전 상태가 초기값
+
+    const handleRemove = () => {
+        if (window.confirm(`${id} 번째 일기를 정말 삭제하시겠습니까?`)) {
+            onRemove(id);
+        }
+    }
+
+    // 수정 취소 시, 기존 content 값 설정 (수정 취소 후 다시 수정하기 눌렀을 때 수정 했던 내용 초기화 위함)
+    const handleQuitEdit = () => {
+        // setIsEdit(false);
+        toggleIsEdit();
+        setLocalContent(content);
+    }
+
+    // 수정 완료 시, 이벤트 처리 함수
+    const handleEdit = () => {
+        if (localContent.length < 5) {
+            localContentInput.current.focus();
+            return;
+        }
+        if (window.confirm(`${id} 번 째 일기를 수정하시겠습니까?`)) {
+            onEdit(id, localContent);
+            toggleIsEdit(); // 수정폼 닫기
+        }
+    }
+
+    return (
+        <div className="DiaryItem">
+            <div className="info">
+                <span>작성자 : {author} | 감정점수 : {emotion}</span>
+                <br/>
+                <span className="date">{new Date(created_date).toLocaleString()}</span>
+            </div>
+            <div className="content">
+                {isEdit ? (
+                    <>
+                        <textarea
+                            ref={localContentInput}
+                            value={localContent}
+                            onChange={(e) => setLocalContent(e.target.value)}
+                        />
+                    </>
+                ) : (
+                    <>{content}</>
+                )}
+            </div>
+            {isEdit ? (
+                <>
+                    <button onClick={handleQuitEdit}>수정 취소</button>
+                    <button onClick={handleEdit}>수정 완료</button>
+                </>
+            ) : (
+                <>
+                    <button onClick={handleRemove}>삭제하기</button>
+                    <button onClick={toggleIsEdit}>수정하기</button>
+                </>
+            )}
+            
+        </div>
+    );
+};
+
+export default React.memo(DiaryItem);
+
+최적화의 시작은 React.memo() 로 export default 되는 컴포넌트를 감싼다. App 컴포넌트에서 onRemove, onEdit 함수를 최적화 한다.
+
+- App.js
+...
+// 최적화 적용
+// setData() 함수에 함수형 Update 적용
+const onRemove = useCallback((targetId) => {
+  // console.log(`${targetId}가 삭제되었습니다.`);
+  // const newDiaryList = data.filter((it) => it.id !== targetId); // targetId 를 포함하지 않은 배열
+  // setData(newDiaryList); // 데이터의 state 를 바꿈
+  setData(data => data.filter((it) => it.id !== targetId)); // 최신 state 이용하기 위한 인자 부분에 data 사용, return 부분에 data 사용해야 최신 업데이트 가능
+}, []);
+
+// 최적화 적용
+// setData() 함수에 함수형 Update 적용
+const onEdit = useCallback((targetId, newContent) => {
+  setData(
+    data => data.map((it) => it.id === targetId ? { ...it, content: newContent } : it)
+  );
+}, []);
+...
+
+DiaryEditor 컴포넌트에서 useEffect 부분은 최적화가 끝났으므로 주석처리 한다.
+이후 일기를 하나 삭제하고 하나 추가해본다.
+
+(DiaryItem 컴포넌트 최적화 결과)
+
+일기를 삭제할 때, 모든 일기에서 렌더링이 일어나지 않는다. 일기 하나를 추가하면 추가한 일기 아이템만 렌더링이 발생한다.
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
