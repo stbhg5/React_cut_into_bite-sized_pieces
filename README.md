@@ -63,5 +63,6 @@
     <a href="https://stbhg5.tistory.com/337">최적화 1 - useMemo</a><br/>
     <a href="https://stbhg5.tistory.com/338">최적화 2 - React.memo</a><br/>
     <a href="https://stbhg5.tistory.com/339">최적화 3 - useCallback</a><br/>
+    <a href="https://stbhg5.tistory.com/340">최적화 4 - 최적화 완성</a><br/>
     <br/>
 
