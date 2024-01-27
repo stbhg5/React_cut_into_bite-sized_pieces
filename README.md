@@ -64,5 +64,6 @@
     <a href="https://stbhg5.tistory.com/338">최적화 2 - React.memo</a><br/>
     <a href="https://stbhg5.tistory.com/339">최적화 3 - useCallback</a><br/>
     <a href="https://stbhg5.tistory.com/340">최적화 4 - 최적화 완성</a><br/>
+    <a href="https://stbhg5.tistory.com/341">복잡한 상태 관리 로직 분리하기 - useReducer</a><br/>
     <br/>
 
