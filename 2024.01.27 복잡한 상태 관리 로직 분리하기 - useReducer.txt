@@ -1,0 +1,164 @@
+[2024.01.27 복잡한 상태 관리 로직 분리하기 - useReducer]
+
+useReducer
+
+1. 상태 변화 로직 분리하기
+상태 변화 처리 함수 : onCreate(데이터 생성 상태 변화 로직), onEdit(데이터 수정 상태 변화 로직), onRemove(데이터 삭제 상태 변화 로직)
+useReducer : 상태관리를 돕는 React Hooks (컴포넌트에서 상태변화 로직을 분리)
+
+- 구조
+const [count(state), dispatch(상태변화 액션발생 함수)] = useReducer(reducer(일어난 상태변화 처리함수(외부 컴포넌트에 존재)), 1(state 초기값));
+
+dispatch({ type: 1 }); // dispatch 매개변수로 전달된는 객체 : action 객체(상태변화를 설명할 객체)
+
+// dispatch 호출시 state 처리
+const reducer = (state(state-상태변화 일어나기 직전), action(액션객체-어떤 상태변화를 일으켜야 하는지에 대한 정보 담긴 객체)) => {
+    switch(action.type) {
+        case 1:
+            return state + 1;
+        default:
+            return state;
+    }
+};
+
+결론적으로, count state 는 2가 된다.
+App 컴포넌트의 상태 변화 로직을 분리해본다.
+
+- App.js
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import './App.css';
+import DiaryEditor from './DiaryEditor';
+import DiaryList from './DiaryList';
+
+// state 처리
+const reducer = (state, action) => {
+  switch(action.type) {
+    case 'INIT': {
+      return action.data; // 새로운 state
+    }
+    case 'CREATE': {
+      const created_date = new Date().getTime();
+      const newItem = {
+        ...action.data,
+        created_date,
+      }
+      return [newItem, ...state];
+    }
+    case 'REMOVE': {
+      return state.filter((it) => it.id !== action.targetId);
+    }
+    case 'EDIT': {
+      return state.map((it) => it.id === action.targetId ? { ...it, content: action.newContent } : it);
+    }
+    default:
+      return state; // type 잘못 전달했다 생각하고, 상태 변화하지 않음
+  }
+}
+
+function App() {
+
+  // useReducer Hooks 로 관리할 것이기에 주석처리
+  // const [data, setData] = useState([]); // 빈 배열로 시작 (일기가 없는 상태로 시작)
+
+  // setData 가 했던 역할을 dispatch 와 reducer 가 처리
+  const [data, dispatch] = useReducer(reducer, []);
+
+  const dataId = useRef(0);
+
+  // useReducer 적용
+  const getData = async() => {
+    const res = await fetch('https://jsonplaceholder.typicode.com/comments').then((res) => res.json());
+    // 0~19 인덱스까지 자르고, 데이터를 하나씩 순회하여 return 되는 객체 모아서 배열 만듦
+    const initData = res.slice(0, 20).map((it) => {
+      return {
+        author: it.email,
+        content: it.body,
+        emotion: Math.floor(Math.random() * 5) + 1, // 0~4 까지 랜덤 난수 생성 후 정수로 형변환(소수점 버림) + 1
+        created_data: new Date().getTime(), // 현재시간으로 생성 후 밀리세컨드로 바꿈
+        id: dataId.current++ // 후위연산자
+      }
+    });
+
+    // setData(initData);
+    dispatch({ type: 'INIT', data: initData });
+    
+  };
+
+  // Mount
+  useEffect(() => {
+    getData();
+  }, []);
+
+  // useReducer 적용
+  const onCreate = useCallback((author, content, emotion) => {
+    dispatch({
+      type: 'CREATE',
+      data: { author, content, emotion, id: dataId.current },
+    });
+    /*
+    const created_date = new Date().getTime();
+    const newItem = {
+      author,
+      content,
+      emotion,
+      created_date,
+      id: dataId.current
+    }
+    */
+    dataId.current += 1;
+    // setData((data) => [newItem, ...data]);
+  }, []);
+
+  // useReducer 적용
+  const onRemove = useCallback((targetId) => {
+    // setData(data => data.filter((it) => it.id !== targetId));
+    dispatch({ type: 'REMOVE', targetId });
+  }, []);
+
+  // useReducer 적용
+  const onEdit = useCallback((targetId, newContent) => {
+    /*
+    setData(
+      data => data.map((it) => it.id === targetId ? { ...it, content: newContent } : it)
+    );
+    */
+    dispatch({ type: 'EDIT', targetId, newContent });
+  }, []);
+
+  // 일기 기분 분석 함수
+  const getDiaryAnalysis = useMemo(() => {
+    // console.log('일기 분석 시작');
+    const goodCount = data.filter((it) => it.emotion >= 3).length; // 기분 좋은 일기 개수
+    const badCount = data.length - goodCount; // 기분 나쁜 일기 개수
+    const goodRatio = (goodCount / data.length) * 100; // 기분 좋은 일기 비율
+    return { goodCount, badCount, goodRatio };
+  }, [data.length]);
+
+  // 비 구조화 할당으로 결과값 할당
+  const { goodCount, badCount, goodRatio } = getDiaryAnalysis;
+
+  return (
+    <div className="App">
+      {/* <Lifecycle /> */}
+      {/* <OptimizeTest /> */}
+      <DiaryEditor onCreate={onCreate}/>
+      <div>전체 일기 : {data.length}</div>
+      <div>기분 좋은 일기 개수 : {goodCount}</div>
+      <div>기분 나쁜 일기 개수 : {badCount}</div>
+      <div>기분 좋은 일기 비율 : {goodRatio}</div>
+      <DiaryList diaryList={data} onRemove={onRemove} onEdit={onEdit} />
+    </div>
+  );
+}
+
+export default App;
+
+먼저 useState Hooks 를 주석처리 하는데, useReducer Hooks 를 통해 상태를 관리할 것이기 때문이다. setData 가 했던 역할을 dispatch 와 reducer 가 처리하도록 구현했다.
+이후 useReducer 로 바꾼 상태변화를 실행해본다. INIT, CREATE, REMOVE, EDIT 타입의 state 처리가 성공적으로 이루어지며, 컴포넌트 최적화도 잘 이루어지고 있다.
+
+(useReducer 로 바꾼 상태변화 실행 결과)
+
+또한 중요한 사실은 상태 변화를 발생시키는 dispatch 함수는, 함수형 UPDATE 필요없이 호출하면 현재의 state 를 reducer 함수가 참조한다. 따라서 useCallback 사용하며 Dependency Array 를 걱정하지 않아도 된다.
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
