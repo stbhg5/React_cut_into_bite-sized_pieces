@@ -1,0 +1,540 @@
+[2024.01.28 컴포넌트 트리에 데이터 공급하기 - Context]
+
+Context API
+
+1. 컴포넌트 트리에 데이터 공급하기
+자식 컴포넌트로 전달되기 위해 그냥 거쳐가기만 하는 props 들이 존재한다. props 드릴링의 문제를 해결하기 위해 '공급자 컴포넌트(Provider)'를 생성한다.
+부모 컴포넌트는 자신이 가진 모든 데이터를 공급 컴포넌트에게 전달한다. 공급 컴포넌트는 자신의 자손에 해당하는 모든 컴포넌트에게 직통으로 데이터를 준다(props 드릴링 문제 해결). 공급 컴포넌트의 자식 컴포넌트들은 모두 직통으로 데이터를 공급받게 된다.
+이렇게 공급 컴포넌트의 자식 컴포넌트로 배치되어 모든 데이터에 접근할 수 있는 컴포넌트들의 영역을 '문맥(Context)'이라고 한다. 이 컴포넌트들은 일기 데이터를 관리하기 위한 문맥 속에 살아간다고 할 수 있다.
+만약 공급 컴포넌트의 자식으로 배치되지 않은 컴포넌트는 당연히 공급 컴포넌트가 공급하는 데이터에 접근할 수 없으며, 같은 문맥(Context)이 아니라고 할 수 있다.
+
+Context 를 만들고 공급 컴포넌트인 Provider 컴포넌트에게 모든 데이터를 공급하게 하여 props 드릴링 문제를 해결해본다.
+React 에서 Context 관련 코드를 쉽게 작성하도록 돕는 Context API 를 이용한다.
+
+- 구조
+// Context 생성
+const MyContext = React.createContext(defaultValue);
+
+// Context Provider 를 통한 데이터 공급
+<MyContext.Provider value={전역으로 전달하고자 하는 값}>
+    {/* 이 context 안에 위치할 자식 컴포넌트들(컴포넌트 수의 제한X) */}
+</MyContext.Provider>
+
+- App.js
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import './App.css';
+import DiaryEditor from './DiaryEditor';
+import DiaryList from './DiaryList';
+
+// state 처리
+const reducer = (state, action) => {
+  switch(action.type) {
+    case 'INIT': {
+      return action.data; // 새로운 state
+    }
+    case 'CREATE': {
+      const created_date = new Date().getTime();
+      const newItem = {
+        ...action.data,
+        created_date,
+      }
+      return [newItem, ...state];
+    }
+    case 'REMOVE': {
+      return state.filter((it) => it.id !== action.targetId);
+    }
+    case 'EDIT': {
+      return state.map((it) => it.id === action.targetId ? { ...it, content: action.newContent } : it);
+    }
+    default:
+      return state; // type 잘못 전달했다 생각하고, 상태 변화하지 않음
+  }
+};
+
+// Context 생성
+export const DiaryStateContext = React.createContext();
+
+// function App() {
+const App = () => {
+
+  // setData 가 했던 역할을 dispatch 와 reducer 가 처리
+  const [data, dispatch] = useReducer(reducer, []);
+
+  const dataId = useRef(0);
+
+  // useReducer 적용
+  const getData = async() => {
+
+    const res = await fetch('https://jsonplaceholder.typicode.com/comments').then((res) => res.json());
+    // 0~19 인덱스까지 자르고, 데이터를 하나씩 순회하여 return 되는 객체 모아서 배열 만듦
+    const initData = res.slice(0, 20).map((it) => {
+      return {
+        author: it.email,
+        content: it.body,
+        emotion: Math.floor(Math.random() * 5) + 1, // 0~4 까지 랜덤 난수 생성 후 정수로 형변환(소수점 버림) + 1
+        created_data: new Date().getTime(), // 현재시간으로 생성 후 밀리세컨드로 바꿈
+        id: dataId.current++ // 후위연산자
+      }
+    });
+
+    dispatch({ type: 'INIT', data: initData });
+    
+  };
+
+  // Mount
+  useEffect(() => {
+    getData();
+  }, []);
+
+  // useReducer 적용
+  const onCreate = useCallback((author, content, emotion) => {
+    dispatch({
+      type: 'CREATE',
+      data: { author, content, emotion, id: dataId.current },
+    });
+    dataId.current += 1;
+  }, []);
+
+  // useReducer 적용
+  const onRemove = useCallback((targetId) => {
+    // setData(data => data.filter((it) => it.id !== targetId));
+    dispatch({ type: 'REMOVE', targetId });
+  }, []);
+
+  // useReducer 적용
+  const onEdit = useCallback((targetId, newContent) => {
+    dispatch({ type: 'EDIT', targetId, newContent });
+  }, []);
+
+  // 일기 기분 분석 함수
+  const getDiaryAnalysis = useMemo(() => {
+    const goodCount = data.filter((it) => it.emotion >= 3).length; // 기분 좋은 일기 개수
+    const badCount = data.length - goodCount; // 기분 나쁜 일기 개수
+    const goodRatio = (goodCount / data.length) * 100; // 기분 좋은 일기 비율
+    return { goodCount, badCount, goodRatio };
+  }, [data.length]);
+
+  // 비 구조화 할당으로 결과값 할당
+  const { goodCount, badCount, goodRatio } = getDiaryAnalysis;
+
+  return (
+    // Provide 컴포넌트로 묶기
+    <DiaryStateContext.Provider value={data}>
+      <div className="App">
+        <DiaryEditor onCreate={onCreate}/>
+        <div>전체 일기 : {data.length}</div>
+        <div>기분 좋은 일기 개수 : {goodCount}</div>
+        <div>기분 나쁜 일기 개수 : {badCount}</div>
+        <div>기분 좋은 일기 비율 : {goodRatio}</div>
+        <DiaryList diaryList={data} onRemove={onRemove} onEdit={onEdit} />
+      </div>
+    </DiaryStateContext.Provider>
+  );
+
+};
+
+export default App;
+
+Context 생성할 때, export 를 사용했는데, export default 는 파일 하나당 하나밖에 못 쓴다. export 는 여러개 가능하다.
+
+- 예시
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+
+중괄호 안에 있는 함수들은 이름을 바꿀 수 없고, 중괄호 밖에 있는 React 는 이름을 바꿔서 import 받을 수 있다. react 라는 파일에서 export default 로 React 를 내보냈고, 나머지는 export const 로 내보냈으며 비구조화 할당으로만 import 받을 수 있다.
+App 컴포넌트는 기본적으로 App 컴포넌트를 내보내고 있고 부가적으로 DiaryStateContext 를 내보내고 있다. ES 모듈 시스템을 이용할 때 참고한다.
+
+Provide 컴포넌트로 App 컴포넌트의 자식요소를 감싼다. 이후 value props 으로 data state 를 보낸다.
+
+(Context.Provider 의 App 컴포넌트 자식요소 랩핑)
+
+Context 밑의 자식 컴포넌트가 전달받은 data 를 사용해본다.
+DiaryList 컴포넌트에서 useContext 를 사용하여 DiaryStateContext 에 전달된 데이터를 사용해본다.
+
+- App.js
+...
+return (
+  // Provide 컴포넌트로 묶기
+  <DiaryStateContext.Provider value={data}>
+    <div className="App">
+      <DiaryEditor onCreate={onCreate}/>
+      <div>전체 일기 : {data.length}</div>
+      <div>기분 좋은 일기 개수 : {goodCount}</div>
+      <div>기분 나쁜 일기 개수 : {badCount}</div>
+      <div>기분 좋은 일기 비율 : {goodRatio}</div>
+      <DiaryList onRemove={onRemove} onEdit={onEdit} />
+    </div>
+  </DiaryStateContext.Provider>
+);
+...
+
+- DiaryList.js
+import { useContext } from "react";
+import DiaryItem from "./DiaryItem";
+import { DiaryStateContext } from "./App";
+
+const DiaryList = ({ onRemove, onEdit }) => {
+
+    // 지정한 Context 의 값을 가져온다.
+    const diaryList = useContext(DiaryStateContext);
+
+    return (
+        <div className="DiaryList">
+            <h2>일기 리스트</h2>
+            <h4>{diaryList.length} 개의 일기가 있습니다.</h4>
+            <div>
+                {diaryList.map((it) => (
+                    <DiaryItem key={it.id} {...it} onRemove={onRemove} onEdit={onEdit} />
+                ))}
+            </div>
+        </div>
+    );
+};
+
+DiaryList.defaultProps = {
+    diaryList: []
+}
+
+export default DiaryList;
+
+Context 를 통해 전달받은 data 를 성공적으로 사용했다.
+이제 props 드릴링 문제도 해결해본다. 상태변화를 주도하는 함수도 Context 를 통해 공급해본다.
+Provider 컴포넌트에 상태변화 함수를 props 로 전달하면 될 것 같지만, 그렇게 하면 안된다. Provider 도 컴포넌트이기 때문에 props 가 변경되면 재생성 된다. 때문에 그 아래 컴포넌트들 모두 재생성 된다. data state 가 바뀔때마다 리렌더링 되어 최적화 작업이 다 풀리게 된다.
+
+해결 방법은 Context 를 중첩으로 사용하면 된다. 상태변화 함수를 전달할 DiaryDispatchContext 를 만든다. 이후 useMemo 사용하여 props 로 보낼 상태변화함수들을 묶는데, 만약 useMemo 로 묶지 않는다면 App 컴포넌트가 재생성될 때마다 묶은 객체도 재생성 된다. DiaryDispatchContext.Provider 의 value 로 memoizedDispatched 를 전달한다.
+DiaryEditor 컴포넌트, DiaryList 컴포넌트, DiaryItem 컴포넌트에서 useContext 를 사용하여 DiaryDispatchContext 에 전달된 상태변화 함수를 사용하며 props 드릴링을 없애 본다.
+
+- App.js
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import './App.css';
+import DiaryEditor from './DiaryEditor';
+import DiaryList from './DiaryList';
+
+// state 처리
+const reducer = (state, action) => {
+  switch(action.type) {
+    case 'INIT': {
+      return action.data; // 새로운 state
+    }
+    case 'CREATE': {
+      const created_date = new Date().getTime();
+      const newItem = {
+        ...action.data,
+        created_date,
+      }
+      return [newItem, ...state];
+    }
+    case 'REMOVE': {
+      return state.filter((it) => it.id !== action.targetId);
+    }
+    case 'EDIT': {
+      return state.map((it) => it.id === action.targetId ? { ...it, content: action.newContent } : it);
+    }
+    default:
+      return state; // type 잘못 전달했다 생각하고, 상태 변화하지 않음
+  }
+};
+
+// Context 생성
+export const DiaryStateContext = React.createContext(); // data state 전달 : state Context Provider
+export const DiaryDispatchContext = React.createContext(); // 상태변화함수 전달 : dispatch Context Provider
+
+// function App() {
+const App = () => {
+
+  // setData 가 했던 역할을 dispatch 와 reducer 가 처리
+  const [data, dispatch] = useReducer(reducer, []);
+
+  const dataId = useRef(0);
+
+  // useReducer 적용
+  const getData = async() => {
+
+    const res = await fetch('https://jsonplaceholder.typicode.com/comments').then((res) => res.json());
+    // 0~19 인덱스까지 자르고, 데이터를 하나씩 순회하여 return 되는 객체 모아서 배열 만듦
+    const initData = res.slice(0, 20).map((it) => {
+      return {
+        author: it.email,
+        content: it.body,
+        emotion: Math.floor(Math.random() * 5) + 1, // 0~4 까지 랜덤 난수 생성 후 정수로 형변환(소수점 버림) + 1
+        created_data: new Date().getTime(), // 현재시간으로 생성 후 밀리세컨드로 바꿈
+        id: dataId.current++ // 후위연산자
+      }
+    });
+
+    dispatch({ type: 'INIT', data: initData });
+    
+  };
+
+  // Mount
+  useEffect(() => {
+    getData();
+  }, []);
+
+  // useReducer 적용
+  const onCreate = useCallback((author, content, emotion) => {
+    dispatch({
+      type: 'CREATE',
+      data: { author, content, emotion, id: dataId.current },
+    });
+    dataId.current += 1;
+  }, []);
+
+  // useReducer 적용
+  const onRemove = useCallback((targetId) => {
+    // setData(data => data.filter((it) => it.id !== targetId));
+    dispatch({ type: 'REMOVE', targetId });
+  }, []);
+
+  // useReducer 적용
+  const onEdit = useCallback((targetId, newContent) => {
+    dispatch({ type: 'EDIT', targetId, newContent });
+  }, []);
+
+  // useMemo 사용한 상태변화함수 묶기
+  const memoizedDispatched = useMemo(() => {
+    return { onCreate, onRemove, onEdit };
+  }, []); // 재생성되지 않도록 Dependency Array 빈 배열 전달
+
+  // 일기 기분 분석 함수
+  const getDiaryAnalysis = useMemo(() => {
+    const goodCount = data.filter((it) => it.emotion >= 3).length; // 기분 좋은 일기 개수
+    const badCount = data.length - goodCount; // 기분 나쁜 일기 개수
+    const goodRatio = (goodCount / data.length) * 100; // 기분 좋은 일기 비율
+    return { goodCount, badCount, goodRatio };
+  }, [data.length]);
+
+  // 비 구조화 할당으로 결과값 할당
+  const { goodCount, badCount, goodRatio } = getDiaryAnalysis;
+
+  return (
+    // Provide 컴포넌트로 묶기
+    <DiaryStateContext.Provider value={data}>
+      <DiaryDispatchContext.Provider value={memoizedDispatched}>
+        <div className="App">
+          <DiaryEditor />
+          <div>전체 일기 : {data.length}</div>
+          <div>기분 좋은 일기 개수 : {goodCount}</div>
+          <div>기분 나쁜 일기 개수 : {badCount}</div>
+          <div>기분 좋은 일기 비율 : {goodRatio}</div>
+          <DiaryList />
+        </div>
+      </DiaryDispatchContext.Provider>
+    </DiaryStateContext.Provider>
+  );
+
+};
+
+export default App;
+
+- DiaryEditor.js
+import React, { useState, useRef, useContext } from "react";
+import { DiaryDispatchContext } from "./App";
+
+const DiaryEditor = () => {
+
+    // 비구조화 할당으로 받기
+    const { onCreate } = useContext(DiaryDispatchContext);
+
+    // DOM Element 접근
+    const authorInput = useRef();
+    const contentInput = useRef();
+
+    // state 기본값 설정
+    const [state, setState] = useState({
+        author: ""
+      , content: ""
+      , emotion: 1
+    })
+
+    // 이벤트 함수
+    const handleChangeState = (e) => {
+        setState({
+            ...state
+          , [e.target.name]: e.target.value
+        })
+    }
+
+    // 저장 함수
+    const handleSubmit = () => {
+        if (state.author.length < 1) {
+            // alert('작성자는 최소 1글자 이상 입력해주세요.');
+            // focus
+            authorInput.current.focus();
+            return;
+        }
+        if (state.content.length < 5) {
+            // alert('일기 본문은 최소 5글자 이상 입력해주세요.');
+            // focus
+            contentInput.current.focus();
+            return;
+        }
+        onCreate(state.author, state.content, state.emotion);
+        alert('저장 성공!');
+        // 저장 후 일기장 입력폼 초기화
+        setState({
+            author: ''
+          , content: ''
+          , emotion: 1
+        });
+    }
+
+    return (
+        <div className="DiaryEditor">
+            <h2>오늘의 일기</h2>
+            <div>
+                <input
+                    ref={authorInput}
+                    name="author"
+                    value={state.author}
+                    onChange={handleChangeState}
+                />
+            </div>
+            <div>
+                <textarea
+                    ref={contentInput}
+                    name="content"
+                    value={state.content}
+                    onChange={handleChangeState}
+                />
+            </div>
+            <div>
+                <select
+                    name="emotion"
+                    value={state.emotion}
+                    onChange={handleChangeState}
+                >
+                    <option value={1}>1</option>
+                    <option value={2}>2</option>
+                    <option value={3}>3</option>
+                    <option value={4}>4</option>
+                    <option value={5}>5</option>
+                </select>
+            </div>
+            <div>
+                <button onClick={handleSubmit}>일기 저장하기</button>
+            </div>
+        </div>
+    )
+  
+}
+
+export default React.memo(DiaryEditor);
+
+- DiaryList.js
+import { useContext } from "react";
+import DiaryItem from "./DiaryItem";
+import { DiaryStateContext } from "./App";
+
+const DiaryList = () => {
+
+    // 지정한 Context 의 값을 가져온다.
+    const diaryList = useContext(DiaryStateContext);
+
+    return (
+        <div className="DiaryList">
+            <h2>일기 리스트</h2>
+            <h4>{diaryList.length} 개의 일기가 있습니다.</h4>
+            <div>
+                {diaryList.map((it) => (
+                    <DiaryItem key={it.id} {...it} />
+                ))}
+            </div>
+        </div>
+    );
+};
+
+DiaryList.defaultProps = {
+    diaryList: []
+}
+
+export default DiaryList;
+
+- DiaryItem.js
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { DiaryDispatchContext } from "./App";
+
+const DiaryItem = ({ author, content, created_date, emotion, id }) => {
+
+    // 어떤 아이템에 리렌더링이 일어나는지 확인
+    /*
+    useEffect(() => {
+        console.log(`${id} 번 째 아이템 렌더!`);
+    });
+    */
+
+    // 비구조화 할당으로 받기
+    const { onRemove, onEdit } = useContext(DiaryDispatchContext);
+
+    const [isEdit, setIsEdit] = useState(false); // 수정중인지 판단하는 boolean 저장
+    const toggleIsEdit = () => setIsEdit(!isEdit); // isEdit 값 반전
+    const localContentInput = useRef(); // 포커싱을 위한 DOM 객체
+
+    const [localContent, setLocalContent] = useState(content); // textarea 의 input 을 핸들링 할 state, 수정하기 이전 상태가 초기값
+
+    const handleRemove = () => {
+        if (window.confirm(`${id} 번째 일기를 정말 삭제하시겠습니까?`)) {
+            onRemove(id);
+        }
+    }
+
+    // 수정 취소 시, 기존 content 값 설정 (수정 취소 후 다시 수정하기 눌렀을 때 수정 했던 내용 초기화 위함)
+    const handleQuitEdit = () => {
+        // setIsEdit(false);
+        toggleIsEdit();
+        setLocalContent(content);
+    }
+
+    // 수정 완료 시, 이벤트 처리 함수
+    const handleEdit = () => {
+        if (localContent.length < 5) {
+            localContentInput.current.focus();
+            return;
+        }
+        if (window.confirm(`${id} 번 째 일기를 수정하시겠습니까?`)) {
+            onEdit(id, localContent);
+            toggleIsEdit(); // 수정폼 닫기
+        }
+    }
+
+    return (
+        <div className="DiaryItem">
+            <div className="info">
+                <span>작성자 : {author} | 감정점수 : {emotion}</span>
+                <br/>
+                <span className="date">{new Date(created_date).toLocaleString()}</span>
+            </div>
+            <div className="content">
+                {isEdit ? (
+                    <>
+                        <textarea
+                            ref={localContentInput}
+                            value={localContent}
+                            onChange={(e) => setLocalContent(e.target.value)}
+                        />
+                    </>
+                ) : (
+                    <>{content}</>
+                )}
+            </div>
+            {isEdit ? (
+                <>
+                    <button onClick={handleQuitEdit}>수정 취소</button>
+                    <button onClick={handleEdit}>수정 완료</button>
+                </>
+            ) : (
+                <>
+                    <button onClick={handleRemove}>삭제하기</button>
+                    <button onClick={toggleIsEdit}>수정하기</button>
+                </>
+            )}
+            
+        </div>
+    );
+};
+
+export default React.memo(DiaryItem);
+
+(Context 이용한 상태변화함수 전달 후 사용 결과)
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
