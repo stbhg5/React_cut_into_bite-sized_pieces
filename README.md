@@ -68,3 +68,7 @@
     <a href="https://stbhg5.tistory.com/342">컴포넌트 트리에 데이터 공급하기 - Context</a><br/>
     <br/>
 
+<p>섹션 6. React 실전 프로젝트 - 감정 일기장 만들기<p/>
+    <a href="https://stbhg5.tistory.com/343">페이지 라우팅 0 - React SPA & CSR</a><br/>
+    <br/>
+    
