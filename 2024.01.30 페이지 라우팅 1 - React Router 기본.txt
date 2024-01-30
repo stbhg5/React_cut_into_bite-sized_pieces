@@ -1,0 +1,332 @@
+[2024.01.30 페이지 라우팅 1 - React Router 기본]
+
+CSR
+
+- 터미널
+npx create-react-app emotion_diary
+    Creating a new React app in D:\개발\emotion_diary\emotion_diary.
+
+    Installing packages. This might take a couple of minutes.
+    Installing react, react-dom, and react-scripts with cra-template...
+
+
+    added 1484 packages in 29s
+
+    250 packages are looking for funding
+    run `npm fund` for details
+    Git repo not initialized Error: Command failed: git --version
+        at checkExecSyncError (node:child_process:890:11)
+        at execSync (node:child_process:962:15)
+        at tryGitInit (D:\개발\emotion_diary\emotion_diary\node_modules\react-scripts\scripts\init.js:46:5)
+        at module.exports (D:\개발\emotion_diary\emotion_diary\node_modules\react-scripts\scripts\init.js:276:7)
+        at [eval]:3:14
+        at runScriptInThisContext (node:internal/vm:144:10)
+        at node:internal/process/execution:109:14
+        at [eval]-wrapper:6:24
+        at runScript (node:internal/process/execution:92:62) {
+    status: 1,
+    signal: null,
+    output: [ null, null, null ],
+    pid: 42980,
+    stdout: null,
+    stderr: null
+    }
+
+    Installing template dependencies using npm...
+
+    added 69 packages, and changed 1 package in 3s
+
+    254 packages are looking for funding
+    run `npm fund` for details
+    Removing template package using npm...
+
+
+    removed 1 package, and audited 1553 packages in 2s
+
+    254 packages are looking for funding
+    run `npm fund` for details
+
+    8 vulnerabilities (2 moderate, 6 high)
+
+    To address all issues (including breaking changes), run:
+    npm audit fix --force
+
+    Run `npm audit` for details.
+
+    Success! Created emotion_diary at D:\개발\emotion_diary\emotion_diary
+    Inside that directory, you can run several commands:
+
+    npm start
+        Starts the development server.
+
+    npm run build
+        Bundles the app into static files for production.
+
+    npm test
+        Starts the test runner.
+
+    npm run eject
+        Removes this tool and copies build dependencies, configuration files
+        and scripts into the app directory. If you do this, you can’t go back!
+
+    We suggest that you begin by typing:
+
+    cd emotion_diary
+    npm start
+
+    Happy hacking!
+
+이후 emotion_diary\emotion_diary 폴더 내의 내용물들을 한 계층 위인 emotion_diary 로 옮긴다. 이후 기존 emotion_diary 폴더는 삭제.
+src 폴더의 App.test.js, logo.svg, reportWebVitals.js, setupTests.js 파일 삭제.
+src\App.js 에서 필요없는 import 지우고 App() 함수의 return 안에 감싸주는 div 태그쌍 하나만 남겨두기.
+src\index.js 에서 'import reportWebVitals from './reportWebVitals';' 와 'reportWebVitals();' 지우기.
+
+페이지 라우팅을 하기 위해 CSR 을 도와주는 라이브러리인 'React Router' 를 이용할 것이다.
+구글에 'react router' 검색 후 React Router 공식 홈페이지 접속.
+
+참고 링크 : https://reactrouter.com/en/main
+
+이후 npm 설치 항목 찾기. (2024.01.30 기준 Installation 메뉴가 보이지 않음)
+
+npm install react-router-dom@6
+
+@6 은 6 버전을 설치하도록 명시적으로 명령.
+
+- 터미널
+npm install react-router-dom@6
+    added 3 packages, and audited 1556 packages in 4s
+
+    254 packages are looking for funding
+    run `npm fund` for details
+
+    8 vulnerabilities (2 moderate, 6 high)
+
+    To address all issues (including breaking changes), run:
+    npm audit fix --force
+
+    Run `npm audit` for details.
+
+npm audit fix --force
+
+이후 npm start 시 제대로 동작하지 않음. 따라서 재설치 한다. 'npm audit fix --force' 명령은 함부로 하면 안되겠다.
+설치가 완료되면 잘 설치되었는지 확인하기 위해 package.json 에서 "dependencies" 에서 "react-router-dom": "^6.21.3" 를 확인한다.
+
+- 터미널
+npm start
+
+src\App.css 파일 내용 비우기. src\index.css 파일 내용도 비우기.
+
+- App.js
+import './App.css';
+
+function App() {
+  return (
+    <div className="App">
+      <h2>App.js</h2>
+    </div>
+  );
+}
+
+export default App;
+
+- App.css
+.App {
+    padding: 20px;
+}
+
+이제 페이지로 사용할 컴포넌트 생성한다. 총 4개를 만들 것이다. src/pages 경로에 Home.js, New.js, Edit.js, Diary.js 파일을 생성한다.
+
+- Home.js
+const Home = () => {
+    return (
+        <div>
+            <h1>Home</h1>
+            <p>이곳은 홈 입니다.</p>
+        </div>
+    );
+};
+
+export default Home;
+
+- New.js
+const New = () => {
+    return (
+        <div>
+            <h1>New</h1>
+            <p>이곳은 일기 작성 페이지 입니다.</p>
+        </div>
+    );
+};
+
+export default New;
+
+- Edit.js
+const Edit = () => {
+    return (
+        <div>
+            <h1>Edit</h1>
+            <p>이곳은 일기 수정 페이지 입니다.</p>
+        </div>
+    );
+};
+
+export default Edit;
+
+- Diary.js
+const Diary = () => {
+    return (
+        <div>
+            <h1>Diary</h1>
+            <p>이곳은 일기 상세 페이지 입니다.</p>
+        </div>
+    );
+};
+
+export default Diary;
+
+이제 React Router Dom 을 사용해 4개의 페이지를 특정 주소에 연결하여 Page Routing 을 시도한다.
+브라우저의 URL 과 React 의 앱을 연결하는 기능을 하는 BrowserRouter 라는 컴포넌트로 App 컴포넌트가 return 하는 부분을 감싸준다. 감싸진 부분들은 브라우저의 URL 과 맵핑될 수 있다.
+이후 생성했던 4개의 컴포넌트를 import 한다.
+
+- App.js
+import './App.css';
+import { BrowserRouter } from 'react-router-dom';
+import Home from './pages/Home';
+import New from './pages/New';
+import Edit from './pages/Edit';
+import Diary from './pages/Diary';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <div className="App">
+        <h2>App.js</h2>
+      </div>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+
+이제 본격적인 라우팅을 시작한다.
+브라우저의 URL 이 바뀌게 되면 어떤 컴포넌트를 렌더링하여 페이지 역할을 하게할 것인지 결정하기 위해, 바뀔 부분을 Routes 컴포넌트로 감싸준다. 이후 Routes 태그 안에 Route 컴포넌트를 추가한다. Route 컴포넌트는 URL 경로와 컴포넌트를 맵핑시켜 준다.
+Route 컴포넌트의 path 가 '/' (index.js) 일 때, element 에 Home 컴포넌트를 전달한다.
+
+- App.js
+import './App.css';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Home from './pages/Home';
+import New from './pages/New';
+import Edit from './pages/Edit';
+import Diary from './pages/Diary';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <div className="App">
+        <h2>App.js</h2>
+        <Routes>
+          <Route path='/' element={<Home />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+
+(Route 컴포넌트에 경로와 컴포넌트 전달 결과)
+
+이번엔 Route 컴포넌트에 위와 동일한 방법으로 New, Edit, Diary 컴포넌트를 연결한다. Routes 바깥부분은 페이지가 바뀌어도 그대로 유지된다.
+
+- App.js
+import './App.css';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Home from './pages/Home';
+import New from './pages/New';
+import Edit from './pages/Edit';
+import Diary from './pages/Diary';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <div className="App">
+        <h2>App.js</h2>
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/new' element={<New />} />
+          <Route path='/edit' element={<Edit />} />
+          <Route path='/diary' element={<Diary />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+
+이번에는 페이지를 이동시키는 요소를 만들어본다.
+
+- a 태그 예시
+<a href={'/new'}>NEW 로 이동!</a>
+
+HTML 의 a 태그로 페이지를 이동시키면 새로고침 되어 이동하게 되는데, 이것은 MPA 의 특징이다. 따라서 a 태그로 페이지 이동을 하지 않을 것이다. a 태그로 페이지 이동을 하는 경우는 페이지 외부로 나가는 URL 로 이동할 때 사용한다.
+React Router 에서는 별도의 컴포넌트를 이용하여 페이지 이동을 하게 되는데, 페이지 이동을 실험해보기 위해 간단한 컴포넌트를 생성하고, App 컴포넌트의 자식으로 배치한다. src\components 경로에 RouteTest.js 파일 생성.
+RouteTest 컴포넌트에서는 SPA 방식 즉, CSR 방식으로 페이지를 이동시켜주는 Link 컴포넌트를 사용한다. 이후 App 컴포넌트에서 RouteTest 컴포넌트를 import 하여 사용한다.
+
+- RouteTest.js
+import { Link } from 'react-router-dom';
+
+const RouteTest = () => {
+    return (
+        <>
+            <Link to={'/'}>HOME</Link>
+            <br/>
+            <Link to={'/diary'}>DIARY</Link>
+            <br/>
+            <Link to={'/new'}>NEW</Link>
+            <br/>
+            <Link to={'/edit'}>EDIT</Link>
+        </>
+    );
+}
+
+export default RouteTest;
+
+- App.js
+import './App.css';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Home from './pages/Home';
+import New from './pages/New';
+import Edit from './pages/Edit';
+import Diary from './pages/Diary';
+import RouteTest from './components/RouteTest';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <div className="App">
+        <h2>App.js</h2>
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/new' element={<New />} />
+          <Route path='/edit' element={<Edit />} />
+          <Route path='/diary' element={<Diary />} />
+        </Routes>
+        <RouteTest />
+      </div>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+
+이후 화면에서 HOME 을 눌러 페이지로 이동하면, 컴포넌트가 리렌더링 되며 페이지가 이동되는 것을 확인할 수 있다.
+
+(Link 컴포넌트 이용한 페이지 이동)
+
+CSR 방식으로 페이지를 이동시키게 되면, 실제 페이지를 이동하기 보단, 페이지 역할을 하는 컴포넌트로 갈아끼우고 URL 도 바꿔 마치 페이지가 이동한 것처럼 보이게 만드는 방식이다.
+결론적으로, React 앱이 제공하는 HTML 파일은 index.html 하나지만, App 컴포넌트와 그 안에 Router 들을 통해 URL 경로별로 렌더링되는 컴포넌트들을 계속해서 변경하여 마치 페이지가 이동된 것처럼 보이게 하는 방식이다.
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
