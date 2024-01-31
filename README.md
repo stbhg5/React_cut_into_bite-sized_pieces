@@ -71,5 +71,6 @@
 <p>섹션 6. React 실전 프로젝트 - 감정 일기장 만들기<p/>
     <a href="https://stbhg5.tistory.com/343">페이지 라우팅 0 - React SPA & CSR</a><br/>
     <a href="https://stbhg5.tistory.com/344">페이지 라우팅 1 - React Router 기본</a><br/>
+    <a href="https://stbhg5.tistory.com/345">페이지 라우팅 2 - React Router 응용</a><br/>
     <br/>
     
