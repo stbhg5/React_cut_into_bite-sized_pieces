@@ -73,5 +73,6 @@
     <a href="https://stbhg5.tistory.com/344">페이지 라우팅 1 - React Router 기본</a><br/>
     <a href="https://stbhg5.tistory.com/345">페이지 라우팅 2 - React Router 응용</a><br/>
     <a href="https://stbhg5.tistory.com/346">프로젝트 기초 공사 1</a><br/>
+    <a href="https://stbhg5.tistory.com/347">프로젝트 기초 공사 2</a><br/>
     <br/>
     
