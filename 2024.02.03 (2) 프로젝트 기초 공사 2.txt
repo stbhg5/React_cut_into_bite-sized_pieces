@@ -1,0 +1,333 @@
+[2024.02.03 (2) 프로젝트 기초 공사 2]
+
+프로젝트 상태관리 기초 공사 하기
+
+기초공사 항목)
+- 상태 관리 세팅하기
+프로젝트 전반적으로 사용될 일기 데이터 State 관리 로직 작성하기
+
+- 프로젝트 State Context 세팅하기
+일기 데이터 State 를 공급할 Context 를 생성하고 Provider 로 공급하기
+
+- 프로젝트 Dispatch Context 세팅하기
+일기 데이터 State 의 Dispatch 함수들을 공급할 Context 를 생성하고 Provider 로 공급하기
+
+1. 기초공사 1 : 상태 관리
+App 컴포넌트 : 일기 데이터 State
+    ↘ ReactRouter → Home(일기 리스트), New(일기 생성 로직), Edit(일기 수정 로직), Diary(일기 하나의 데이터)
+일기 데이터를 관리할 state 를 App 컴포넌트에 작성한다. 이후 reducer 함수를 만들어 state 처리를 하도록 하고 각 dispatch 함수를 생성하여 action 을 전달한다.
+
+- App.js
+import { useReducer, useRef } from 'react';
+import './App.css';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Home from './pages/Home';
+import New from './pages/New';
+import Edit from './pages/Edit';
+import Diary from './pages/Diary';
+
+// state 처리
+const reducer = (state, action) => {
+  let newState = [];
+  switch (action.type) {
+    case 'INIT': {
+      return action.data;
+    }
+    case 'CREATE': {
+      /*
+      const newItem = {
+        ...action.data
+      };
+      newState = [newItem, ...state];
+      */
+      newState = [action.data, ...state];
+      break;
+    }
+    case 'REMOVE': {
+      newState = state.filter((it) => it.id !== action.targetId);
+      break;
+    }
+    case 'EDIT': {
+      newState = state.map((it) => it.id === action.data.id ? { ...action.data } : it);
+      break;
+    }
+    default:
+      return state;
+  }
+  return newState;
+}
+
+function App() {
+
+  const [data, dispatch] = useReducer(reducer, []);
+
+  // ID 설정
+  const dataId = useRef(0);
+
+  // CREATE
+  const onCreate = (date, content, emotion) => {
+    dispatch({
+      type: 'CREATE',
+      data: {
+        id: dataId.current,
+        date: new Date(date).getTime(),
+        content,
+        emotion
+      }
+    });
+    dataId.current += 1;
+  };
+
+  // REMOVE
+  const onRemove = (targetId) => {
+    dispatch({ type: 'REMOVE', targetId });
+  };
+
+  // EDIT
+  const onEdit = (targetId, date, content, emotion) => {
+    dispatch({
+      type: 'EDIT',
+      data: {
+        id: targetId,
+        date: new Date(date).getTime(),
+        content,
+        emotion
+      }
+    });
+  };
+
+  return (
+    <BrowserRouter>
+      <div className="App">
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/new' element={<New />} />
+          <Route path='/edit' element={<Edit />} />
+          <Route path='/diary/:id' element={<Diary />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+
+2. 기초공사 2 : 프로젝트 State Context 세팅
+state 상태관리 로직에 context 를 만들어 data state 를 컴포넌트 트리 전역에 공급한다.
+
+- App.js
+import React, { useReducer, useRef } from 'react';
+import './App.css';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Home from './pages/Home';
+import New from './pages/New';
+import Edit from './pages/Edit';
+import Diary from './pages/Diary';
+
+// state 처리
+const reducer = (state, action) => {
+  let newState = [];
+  switch (action.type) {
+    case 'INIT': {
+      return action.data;
+    }
+    case 'CREATE': {
+      /*
+      const newItem = {
+        ...action.data
+      };
+      newState = [newItem, ...state];
+      */
+      newState = [action.data, ...state];
+      break;
+    }
+    case 'REMOVE': {
+      newState = state.filter((it) => it.id !== action.targetId);
+      break;
+    }
+    case 'EDIT': {
+      newState = state.map((it) => it.id === action.data.id ? { ...action.data } : it);
+      break;
+    }
+    default:
+      return state;
+  }
+  return newState;
+}
+
+export const DiaryStateContext = React.createContext();
+
+function App() {
+
+  const [data, dispatch] = useReducer(reducer, []);
+
+  // ID 설정
+  const dataId = useRef(0);
+
+  // CREATE
+  const onCreate = (date, content, emotion) => {
+    dispatch({
+      type: 'CREATE',
+      data: {
+        id: dataId.current,
+        date: new Date(date).getTime(),
+        content,
+        emotion
+      }
+    });
+    dataId.current += 1;
+  };
+
+  // REMOVE
+  const onRemove = (targetId) => {
+    dispatch({ type: 'REMOVE', targetId });
+  };
+
+  // EDIT
+  const onEdit = (targetId, date, content, emotion) => {
+    dispatch({
+      type: 'EDIT',
+      data: {
+        id: targetId,
+        date: new Date(date).getTime(),
+        content,
+        emotion
+      }
+    });
+  };
+
+  return (
+    <DiaryStateContext.Provider value={data}>
+      <BrowserRouter>
+        <div className="App">
+          <Routes>
+            <Route path='/' element={<Home />} />
+            <Route path='/new' element={<New />} />
+            <Route path='/edit' element={<Edit />} />
+            <Route path='/diary/:id' element={<Diary />} />
+          </Routes>
+        </div>
+      </BrowserRouter>
+    </DiaryStateContext.Provider>
+  );
+}
+
+export default App;
+
+3. 기초공사 3 : 프로젝트 Dispatch Context 세팅
+dispatch 함수들도 context 생성하여 컴포넌트 트리 전역에 공급한다.
+
+- App.js
+import React, { useReducer, useRef } from 'react';
+import './App.css';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Home from './pages/Home';
+import New from './pages/New';
+import Edit from './pages/Edit';
+import Diary from './pages/Diary';
+
+// state 처리
+const reducer = (state, action) => {
+  let newState = [];
+  switch (action.type) {
+    case 'INIT': {
+      return action.data;
+    }
+    case 'CREATE': {
+      /*
+      const newItem = {
+        ...action.data
+      };
+      newState = [newItem, ...state];
+      */
+      newState = [action.data, ...state];
+      break;
+    }
+    case 'REMOVE': {
+      newState = state.filter((it) => it.id !== action.targetId);
+      break;
+    }
+    case 'EDIT': {
+      newState = state.map((it) => it.id === action.data.id ? { ...action.data } : it);
+      break;
+    }
+    default:
+      return state;
+  }
+  return newState;
+}
+
+// state context
+export const DiaryStateContext = React.createContext();
+// dispatch context
+export const DiaryDispatchContext = React.createContext();
+
+function App() {
+
+  const [data, dispatch] = useReducer(reducer, []);
+
+  // ID 설정
+  const dataId = useRef(0);
+
+  // CREATE
+  const onCreate = (date, content, emotion) => {
+    dispatch({
+      type: 'CREATE',
+      data: {
+        id: dataId.current,
+        date: new Date(date).getTime(),
+        content,
+        emotion
+      }
+    });
+    dataId.current += 1;
+  };
+
+  // REMOVE
+  const onRemove = (targetId) => {
+    dispatch({ type: 'REMOVE', targetId });
+  };
+
+  // EDIT
+  const onEdit = (targetId, date, content, emotion) => {
+    dispatch({
+      type: 'EDIT',
+      data: {
+        id: targetId,
+        date: new Date(date).getTime(),
+        content,
+        emotion
+      }
+    });
+  };
+
+  return (
+    <DiaryStateContext.Provider value={data}>
+      <DiaryDispatchContext.Provider
+        value={{
+          onCreate,
+          onRemove,
+          onEdit
+        }}
+      >
+        <BrowserRouter>
+          <div className="App">
+            <Routes>
+              <Route path='/' element={<Home />} />
+              <Route path='/new' element={<New />} />
+              <Route path='/edit' element={<Edit />} />
+              <Route path='/diary/:id' element={<Diary />} />
+            </Routes>
+          </div>
+        </BrowserRouter>
+      </DiaryDispatchContext.Provider>
+    </DiaryStateContext.Provider>
+  );
+}
+
+export default App;
+
+(2개의 context 를 통해 컴포넌트 트리 전역에 공급)
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
