@@ -1,0 +1,891 @@
+[2024.02.04 페이지 구현 - 홈 (/)]
+
+HOME
+
+일기 홈 페이지의 헤더, 필터링 및 버튼, 리스트를 구현한다.
+
+1. 헤더
+화면에 나타남과 동시에 현재의 년, 월을 표시하고 왼쪽, 오른쪽 버튼을 구현한다.
+
+1) 현재 년월 표시
+- Home.js
+import { useState } from "react";
+import MyHeader from './../components/MyHeader';
+
+const Home = () => {
+
+    const [curDate, setCurDate] = useState(new Date());
+    console.log(curDate);
+
+    const headText = `${curDate.getFullYear()}년 ${curDate.getMonth() + 1}월`
+
+    return (
+        <MyHeader headText={headText}/>
+    );
+};
+
+export default Home;
+
+2) 왼쪽, 오른쪽 버튼 표시
+- Home.js
+import { useState } from "react";
+import MyHeader from './../components/MyHeader';
+import MyButton from './../components/MyButton';
+
+const Home = () => {
+
+    // 현재 시간 설정
+    const [curDate, setCurDate] = useState(new Date());
+    const headText = `${curDate.getFullYear()}년 ${curDate.getMonth() + 1}월`
+
+    // 오른쪽 버튼
+    const increaseMonth = () => {
+        setCurDate(new Date(curDate.getFullYear(), curDate.getMonth() + 1, curDate.getDate()));
+    }
+    // 왼쪽 버튼
+    const decreaseMonth = () => {
+        setCurDate(new Date(curDate.getFullYear(), curDate.getMonth() - 1, curDate.getDate()));
+    }
+
+    return (
+        <MyHeader
+            headText={headText}
+            leftChild={<MyButton text={'<'} onClick={decreaseMonth} />}
+            rightChild={<MyButton text={'>'} onClick={increaseMonth} />}
+        />
+    );
+};
+
+export default Home;
+
+2. 간단한 리스트
+App 컴포넌트에서 dummy data 를 만들어 state context 로 Home 컴포넌트에 넘겨준다. Home 컴포넌트에서는 context 를 통해 받은 data 를 curDate state 의 날짜에 따라 가공한다. 이후 가공한 데이터를 자식인 DiaryList 컴포넌트에서 출력한다.
+src\components\DiaryList.js 파일을 생성한다.
+
+- App.js
+import React, { useReducer, useRef } from 'react';
+import './App.css';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Home from './pages/Home';
+import New from './pages/New';
+import Edit from './pages/Edit';
+import Diary from './pages/Diary';
+
+// state 처리
+const reducer = (state, action) => {
+  let newState = [];
+  switch (action.type) {
+    case 'INIT': {
+      return action.data;
+    }
+    case 'CREATE': {
+      /*
+      const newItem = {
+        ...action.data
+      };
+      newState = [newItem, ...state];
+      */
+      newState = [action.data, ...state];
+      break;
+    }
+    case 'REMOVE': {
+      newState = state.filter((it) => it.id !== action.targetId);
+      break;
+    }
+    case 'EDIT': {
+      newState = state.map((it) => it.id === action.data.id ? { ...action.data } : it);
+      break;
+    }
+    default:
+      return state;
+  }
+  return newState;
+}
+
+// state context
+export const DiaryStateContext = React.createContext();
+// dispatch context
+export const DiaryDispatchContext = React.createContext();
+
+// dummy data
+const dummyData = [
+  {
+    id: 1,
+    emotion: 1,
+    content: '오늘의 일기 1번',
+    date: new Date().getTime()
+  },
+  {
+    id: 2,
+    emotion: 2,
+    content: '오늘의 일기 2번',
+    date: new Date().getTime() + 1
+  },
+  {
+    id: 3,
+    emotion: 3,
+    content: '오늘의 일기 3번',
+    date: new Date().getTime() + 2
+  },
+  {
+    id: 4,
+    emotion: 4,
+    content: '오늘의 일기 4번',
+    date: new Date().getTime() + 3
+  },
+  {
+    id: 5,
+    emotion: 5,
+    content: '오늘의 일기 5번',
+    date: new Date().getTime() + 4
+  },
+  {// 먼 미래
+    id: 6,
+    emotion: 2,
+    content: '오늘의 일기 6번',
+    date: 1807035077876
+  }
+];
+
+function App() {
+
+  // const [data, dispatch] = useReducer(reducer, []);
+  const [data, dispatch] = useReducer(reducer, dummyData);
+
+  // console.log(new Date().getTime() + 1);
+
+  // ID 설정
+  const dataId = useRef(0);
+
+  // CREATE
+  const onCreate = (date, content, emotion) => {
+    dispatch({
+      type: 'CREATE',
+      data: {
+        id: dataId.current,
+        date: new Date(date).getTime(),
+        content,
+        emotion
+      }
+    });
+    dataId.current += 1;
+  };
+
+  // REMOVE
+  const onRemove = (targetId) => {
+    dispatch({ type: 'REMOVE', targetId });
+  };
+
+  // EDIT
+  const onEdit = (targetId, date, content, emotion) => {
+    dispatch({
+      type: 'EDIT',
+      data: {
+        id: targetId,
+        date: new Date(date).getTime(),
+        content,
+        emotion
+      }
+    });
+  };
+
+  return (
+    <DiaryStateContext.Provider value={data}>
+      <DiaryDispatchContext.Provider
+        value={{
+          onCreate,
+          onRemove,
+          onEdit
+        }}
+      >
+        <BrowserRouter>
+          <div className="App">
+            <Routes>
+              <Route path='/' element={<Home />} />
+              <Route path='/new' element={<New />} />
+              <Route path='/edit' element={<Edit />} />
+              <Route path='/diary/:id' element={<Diary />} />
+            </Routes>
+          </div>
+        </BrowserRouter>
+      </DiaryDispatchContext.Provider>
+    </DiaryStateContext.Provider>
+  );
+}
+
+export default App;
+
+- Home.js
+import { useContext, useEffect, useState } from "react";
+import { DiaryStateContext } from "../App";
+import MyHeader from './../components/MyHeader';
+import MyButton from './../components/MyButton';
+import DiaryList from './../components/DiaryList';
+
+const Home = () => {
+
+    // state context
+    const diaryList = useContext(DiaryStateContext);
+
+    // 가공 후 출력할 데이터
+    const [data, setData] = useState([]);
+
+    // 현재 시간 설정
+    const [curDate, setCurDate] = useState(new Date());
+    const headText = `${curDate.getFullYear()}년 ${curDate.getMonth() + 1}월`
+
+    // 오른쪽 버튼
+    const increaseMonth = () => {
+        setCurDate(new Date(curDate.getFullYear(), curDate.getMonth() + 1, curDate.getDate()));
+    }
+    // 왼쪽 버튼
+    const decreaseMonth = () => {
+        setCurDate(new Date(curDate.getFullYear(), curDate.getMonth() - 1, curDate.getDate()));
+    }
+
+    // 받은 데이터 이번달 범위로 필터링
+    useEffect(() => {
+        if (diaryList.length >= 1) {
+            const firstDay = new Date(curDate.getFullYear(), curDate.getMonth(), 1).getTime(); // 이번년도 이번달 1일 밀리세컨즈
+            const lastDay = new Date(curDate.getFullYear(), curDate.getMonth() + 1, 0).getTime(); // 이번년도 이번달 마지막일 밀리세컨즈
+            setData(diaryList.filter((it) => firstDay <= it.date && it.date <= lastDay));
+        }
+    }, [curDate, diaryList]); // diaryList 가 바뀌었다는건 일기가 추가, 수정, 삭제됨을 의미하므로 추가
+
+    // data 확인
+    useEffect(() => {
+        console.log(data);
+    }, [data]);
+
+    return (
+        <div>
+            <MyHeader
+                headText={headText}
+                leftChild={<MyButton text={'<'} onClick={decreaseMonth} />}
+                rightChild={<MyButton text={'>'} onClick={increaseMonth} />}
+            />
+            <DiaryList diaryList={data} />
+        </div>
+    );
+
+};
+
+export default Home;
+
+- DiaryList.js
+const DiaryList = ({ diaryList }) => {
+    return (
+        <div>
+            {diaryList.map((it) => (
+                <div key={it.id}>{it.content}</div>
+            ))}
+        </div>
+    );
+}
+
+// 기본값 설정
+DiaryList.defaultProps = {
+    diaryList: []
+}
+
+export default DiaryList;
+
+3. 필터링 및 버튼
+1) 정렬 기능
+DiaryList 컴포넌트에서 최신순/오래된순 정렬을 할 수 있는 정렬 기능을 구현한다.
+
+- DiaryList.js
+import { useState } from "react";
+
+// select box 정렬 option list
+const sortOptionList = [
+    {value: 'latest', name: '최신순'},
+    {value: 'oldest', name: '오래된순'}
+];
+
+// select box 컴포넌트
+const ControlMenu = ({ value, onChange, optionList }) => {
+    return (
+        <select
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+        >
+            {optionList.map((it, idx) => <option key={idx} value={it.value}>{it.name}</option>)}
+        </select>
+    );
+}
+
+const DiaryList = ({ diaryList }) => {
+
+    // 정렬 state
+    const [sortType, setSortType] = useState('latest');
+
+    // 정렬이 적용된 리스트 적용
+    const getProcesseddiaryList = () => {
+        // 배열 내 객체의 data 값 비교 함수
+        const compare = (a, b) => {
+            if (sortType === 'latest') {
+                return parseInt(b.date) - parseInt(a.date); // 내림차순
+            } else {
+                return parseInt(a.date) - parseInt(b.date); // 오름차순
+            }
+        }
+        // diaryList 자체를 변화주지 않기 위함
+        const copyList = JSON.parse(JSON.stringify(diaryList)); // 배열을 JSON 화 한 문자열로 만들고, 다시 JSON 배열로 복호화 한다.
+        const sortedList = copyList.sort(compare); // sort() 는 배열 자체를 변화시킴
+        return sortedList;
+    }
+
+    return (
+        <div>
+            <ControlMenu value={sortType} onChange={setSortType} optionList={sortOptionList} />
+            {getProcesseddiaryList().map((it) => (
+                <div key={it.id}>{it.content}</div>
+            ))}
+        </div>
+    );
+
+}
+
+// 기본값 설정
+DiaryList.defaultProps = {
+    diaryList: []
+}
+
+export default DiaryList;
+
+배열 정렬 참고링크 : https://hianna.tistory.com/409
+
+2) 필터 기능
+DiaryList 컴포넌트에서 감정 종류에 따라 필터링을 할 수 있는 감정 필터 기능을 구현한다.
+
+- DiaryList.js
+import { useState } from "react";
+
+// select box 정렬 option list
+const sortOptionList = [
+    {value: 'latest', name: '최신순'},
+    {value: 'oldest', name: '오래된순'}
+];
+
+// select box 필터 option list
+const filterOptionList = [
+    {value: 'all', name: '전부 다'},
+    {value: 'good', name: '좋은 감정만'},
+    {value: 'bad', name: '안 좋은 감정만'}
+];
+
+// select box 컴포넌트
+const ControlMenu = ({ value, onChange, optionList }) => {
+    return (
+        <select
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+        >
+            {optionList.map((it, idx) => <option key={idx} value={it.value}>{it.name}</option>)}
+        </select>
+    );
+}
+
+const DiaryList = ({ diaryList }) => {
+
+    // 정렬 state
+    const [sortType, setSortType] = useState('latest');
+    // 필터 state
+    const [filter, setFilter] = useState('all');
+
+    // 정렬, 필터링이 적용된 리스트 적용
+    const getProcesseddiaryList = () => {
+        // 필터링 함수
+        const filterCallBack = (item) => {
+            if (filter === 'good') {
+                return parseInt(item.emotion) <= 3;
+            } else {
+                return parseInt(item.emotion) > 3;
+            }
+        }
+        // 배열 내 객체의 data 값 비교 함수
+        const compare = (a, b) => {
+            if (sortType === 'latest') {
+                return parseInt(b.date) - parseInt(a.date); // 내림차순
+            } else {
+                return parseInt(a.date) - parseInt(b.date); // 오름차순
+            }
+        }
+        // diaryList 자체를 변화주지 않기 위해 복사
+        const copyList = JSON.parse(JSON.stringify(diaryList)); // 배열을 JSON 화 한 문자열로 만들고, 다시 JSON 배열로 복호화 한다.
+        // 감정 필터링
+        const filteredList = filter === 'all' ? copyList : copyList.filter((it) => filterCallBack(it));
+        const sortedList = filteredList.sort(compare); // sort() 는 배열 자체를 변화시킴
+        return sortedList;
+    }
+
+    return (
+        <div>
+            <ControlMenu value={sortType} onChange={setSortType} optionList={sortOptionList} />
+            <ControlMenu value={filter} onChange={setFilter} optionList={filterOptionList} />
+            {getProcesseddiaryList().map((it) => (
+                <div key={it.id}>{it.content} {it.emotion}</div>
+            ))}
+        </div>
+    );
+
+}
+
+// 기본값 설정
+DiaryList.defaultProps = {
+    diaryList: []
+}
+
+export default DiaryList;
+
+3) 버튼
+DiaryList 컴포넌트에서 버튼을 생성하고, type 을 positive 로 전달하고, 버튼을 누르면 '/new' 페이지로 이동시키도록 구현한다.
+
+- DiaryList.js
+import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import MyButton from "./MyButton";
+
+// select box 정렬 option list
+const sortOptionList = [
+    {value: 'latest', name: '최신순'},
+    {value: 'oldest', name: '오래된순'}
+];
+
+// select box 필터 option list
+const filterOptionList = [
+    {value: 'all', name: '전부 다'},
+    {value: 'good', name: '좋은 감정만'},
+    {value: 'bad', name: '안 좋은 감정만'}
+];
+
+// select box 컴포넌트
+const ControlMenu = ({ value, onChange, optionList }) => {
+    return (
+        <select
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+        >
+            {optionList.map((it, idx) => <option key={idx} value={it.value}>{it.name}</option>)}
+        </select>
+    );
+}
+
+const DiaryList = ({ diaryList }) => {
+
+    // 페이지 이동
+    const navigate = useNavigate();
+    // 정렬 state
+    const [sortType, setSortType] = useState('latest');
+    // 필터 state
+    const [filter, setFilter] = useState('all');
+
+    // 정렬, 필터링이 적용된 리스트 적용
+    const getProcesseddiaryList = () => {
+        // 필터링 함수
+        const filterCallBack = (item) => {
+            if (filter === 'good') {
+                return parseInt(item.emotion) <= 3;
+            } else {
+                return parseInt(item.emotion) > 3;
+            }
+        }
+        // 배열 내 객체의 data 값 비교 함수
+        const compare = (a, b) => {
+            if (sortType === 'latest') {
+                return parseInt(b.date) - parseInt(a.date); // 내림차순
+            } else {
+                return parseInt(a.date) - parseInt(b.date); // 오름차순
+            }
+        }
+        // diaryList 자체를 변화주지 않기 위해 복사
+        const copyList = JSON.parse(JSON.stringify(diaryList)); // 배열을 JSON 화 한 문자열로 만들고, 다시 JSON 배열로 복호화 한다.
+        // 감정 필터링
+        const filteredList = filter === 'all' ? copyList : copyList.filter((it) => filterCallBack(it));
+        const sortedList = filteredList.sort(compare); // sort() 는 배열 자체를 변화시킴
+        return sortedList;
+    }
+
+    return (
+        <div>
+            <ControlMenu value={sortType} onChange={setSortType} optionList={sortOptionList} />
+            <ControlMenu value={filter} onChange={setFilter} optionList={filterOptionList} />
+            <MyButton type={'positive'} text={'새 일기쓰기'} onClick={() => navigate('/new')} />
+            {getProcesseddiaryList().map((it) => (
+                <div key={it.id}>{it.content} {it.emotion}</div>
+            ))}
+        </div>
+    );
+
+}
+
+// 기본값 설정
+DiaryList.defaultProps = {
+    diaryList: []
+}
+
+export default DiaryList;
+
+4) 스타일링
+DiaryList 컴포넌트와 ControlMenu 컴포넌트의 최상위태그 className 에 컴포넌트명을 넣고 스타일 적용을 위한 DiaryList 컴포넌트의 마크업을 살짝 변경한다. 이후 스타일을 적용한다.
+
+- DiaryList.js
+import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import MyButton from "./MyButton";
+
+// select box 정렬 option list
+const sortOptionList = [
+    {value: 'latest', name: '최신순'},
+    {value: 'oldest', name: '오래된순'}
+];
+
+// select box 필터 option list
+const filterOptionList = [
+    {value: 'all', name: '전부 다'},
+    {value: 'good', name: '좋은 감정만'},
+    {value: 'bad', name: '안 좋은 감정만'}
+];
+
+// select box 컴포넌트
+const ControlMenu = ({ value, onChange, optionList }) => {
+    return (
+        <select
+            className='ControlMenu'
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+        >
+            {optionList.map((it, idx) => <option key={idx} value={it.value}>{it.name}</option>)}
+        </select>
+    );
+}
+
+const DiaryList = ({ diaryList }) => {
+
+    // 페이지 이동
+    const navigate = useNavigate();
+    // 정렬 state
+    const [sortType, setSortType] = useState('latest');
+    // 필터 state
+    const [filter, setFilter] = useState('all');
+
+    // 정렬, 필터링이 적용된 리스트 적용
+    const getProcesseddiaryList = () => {
+        // 필터링 함수
+        const filterCallBack = (item) => {
+            if (filter === 'good') {
+                return parseInt(item.emotion) <= 3;
+            } else {
+                return parseInt(item.emotion) > 3;
+            }
+        }
+        // 배열 내 객체의 data 값 비교 함수
+        const compare = (a, b) => {
+            if (sortType === 'latest') {
+                return parseInt(b.date) - parseInt(a.date); // 내림차순
+            } else {
+                return parseInt(a.date) - parseInt(b.date); // 오름차순
+            }
+        }
+        // diaryList 자체를 변화주지 않기 위해 복사
+        const copyList = JSON.parse(JSON.stringify(diaryList)); // 배열을 JSON 화 한 문자열로 만들고, 다시 JSON 배열로 복호화 한다.
+        // 감정 필터링
+        const filteredList = filter === 'all' ? copyList : copyList.filter((it) => filterCallBack(it));
+        const sortedList = filteredList.sort(compare); // sort() 는 배열 자체를 변화시킴
+        return sortedList;
+    }
+
+    return (
+        <div className="DiaryList">
+            <div className='menu_wrapper'>
+                <div className='left_col'>
+                    <ControlMenu value={sortType} onChange={setSortType} optionList={sortOptionList} />
+                    <ControlMenu value={filter} onChange={setFilter} optionList={filterOptionList} />
+                </div>
+                <div className='right_col'>
+                    <MyButton type={'positive'} text={'새 일기쓰기'} onClick={() => navigate('/new')} />
+                </div>
+            </div>
+            {getProcesseddiaryList().map((it) => (
+                <div key={it.id}>{it.content} {it.emotion}</div>
+            ))}
+        </div>
+    );
+
+}
+
+// 기본값 설정
+DiaryList.defaultProps = {
+    diaryList: []
+}
+
+export default DiaryList;
+
+- App.css
+...
+/* DiaryList */
+.DiaryList .menu_wrapper {
+    margin-top: 20px;
+    margin-bottom: 30px;
+
+    display: flex;
+    justify-content: space-between; /* 왼쪽 div, 오른쪽 div 간격 벌어짐 */
+}
+
+.DiaryList .menu_wrapper .right_col {
+    flex-grow: 1; /* display: flex 부모 아래의 남은 모든 넓이 차지 */
+}
+
+.DiaryList .menu_wrapper .right_col button {
+    width: 100%;
+}
+
+.DiaryList .ControlMenu {
+    margin-right: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #ececec;
+
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+
+    cursor: pointer;
+    font-family: 'Nanum Pen Script';
+    font-size: 18px;
+}
+...
+
+(필터와 버튼 스타일 적용)
+
+4. 일기아이템 컴포넌트 구현
+일기 리스트를 만들어주는 DiaryItem 컴포넌트에 감정 이미지, 일기 컨텐츠, 수정하기 버튼을 구현한다. 이후 리스트의 이미지와 컨텐츠 클릭시 '/diary/${id}' 페이지로, 버튼 클릭시 '/edit/${id}' 페이지로 이동시키도록 구현한다.
+src\components\DiaryItem.js 파일을 생성한다.
+
+1) 감정 이미지
+- DiaryItem.js
+const DiaryItem = ({ id, emotion, content, date }) => {
+
+    // PUBLIC_URL 작동 안할 경우 대비
+    const env = process.env;
+    env.PUBLIC_URL = env.PUBLIC_URL || '';
+
+    return (
+        <div className="DiaryItem">
+            <div className={['emotion_imp_wrapper', `emotion_img_wrapper_${emotion}`].join(' ')}>
+                <img src={process.env.PUBLIC_URL + `assets/emotion${emotion}.png`} />
+            </div>
+            <div></div>
+            <div></div>
+        </div>
+    );
+
+};
+
+export default DiaryItem;
+
+- DiaryList.js
+...
+    return (
+        <div className="DiaryList">
+            <div className='menu_wrapper'>
+                <div className='left_col'>
+                    <ControlMenu value={sortType} onChange={setSortType} optionList={sortOptionList} />
+                    <ControlMenu value={filter} onChange={setFilter} optionList={filterOptionList} />
+                </div>
+                <div className='right_col'>
+                    <MyButton type={'positive'} text={'새 일기쓰기'} onClick={() => navigate('/new')} />
+                </div>
+            </div>
+            {getProcesseddiaryList().map((it) => (
+                <DiaryItem key={it.id} {...it} />
+            ))}
+        </div>
+    );
+...
+
+- App.css
+...
+/* DiaryItem */
+.DiaryItem {
+    padding-top: 15px;
+    padding-bottom: 15px;
+    
+    border-bottom: 1px solid #e2e2e2;
+
+    display: flex;
+    justify-content: space-between;
+}
+
+.DiaryItem .emotion_img_wrapper {
+    cursor: pointer;
+    min-width: 120px;
+    height: 80px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+}
+
+.DiaryItem .emotion_img_wrapper_1 {
+    background-color: #64c964;
+}
+
+.DiaryItem .emotion_img_wrapper_2 {
+    background-color: #9dd772;
+}
+
+.DiaryItem .emotion_img_wrapper_3 {
+    background-color: #fdce17;
+}
+
+.DiaryItem .emotion_img_wrapper_4 {
+    background-color: #fd8446;
+}
+
+.DiaryItem .emotion_img_wrapper_5 {
+    background-color: #fd565f;
+}
+
+.DiaryItem .emotion_img_wrapper img {
+    width: 50%;
+}
+...
+
+2) 일기 컨텐츠
+- DiaryItem.js
+const DiaryItem = ({ id, emotion, content, date }) => {
+
+    // PUBLIC_URL 작동 안할 경우 대비
+    const env = process.env;
+    env.PUBLIC_URL = env.PUBLIC_URL || '';
+
+    // 년.월.일 날짜 포맷 변환
+    const strDate = new Date(parseInt(date)).toLocaleDateString();
+
+    return (
+        <div className="DiaryItem">
+            <div className={['emotion_img_wrapper', `emotion_img_wrapper_${emotion}`].join(' ')}>
+                <img src={process.env.PUBLIC_URL + `assets/emotion${emotion}.png`} />
+            </div>
+            <div className="info_wrapper">
+                <div className='diary_date'>{strDate}</div>
+                <div className='diary_content_preview'>{content.slice(0, 25)}</div>
+            </div>
+            <div></div>
+        </div>
+    );
+
+};
+
+export default DiaryItem;
+
+- App.css
+...
+.DiaryItem .info_wrapper {
+    flex-grow: 1;
+    margin-left: 20px;
+    cursor: pointer;
+}
+
+.DiaryItem .diary_date {
+    font-weight: bold;
+    font-size: 25px;
+    margin-bottom: 5px;
+}
+
+.DiaryItem .diary_content_preview {
+    font-size: 18px;
+}
+...
+
+3) 수정하기 버튼
+- DiaryItem.js
+import MyButton from "./MyButton";
+
+const DiaryItem = ({ id, emotion, content, date }) => {
+
+    // PUBLIC_URL 작동 안할 경우 대비
+    const env = process.env;
+    env.PUBLIC_URL = env.PUBLIC_URL || '';
+
+    // 년.월.일 날짜 포맷 변환
+    const strDate = new Date(parseInt(date)).toLocaleDateString();
+
+    return (
+        <div className="DiaryItem">
+            <div className={['emotion_img_wrapper', `emotion_img_wrapper_${emotion}`].join(' ')}>
+                <img src={process.env.PUBLIC_URL + `assets/emotion${emotion}.png`} />
+            </div>
+            <div className="info_wrapper">
+                <div className='diary_date'>{strDate}</div>
+                <div className='diary_content_preview'>{content.slice(0, 25)}</div>
+            </div>
+            <div className="btn_wrapper">
+                <MyButton text={'수정하기'} />
+            </div>
+        </div>
+    );
+
+};
+
+export default DiaryItem;
+
+- App.css
+...
+.DiaryItem .btn_wrapper {
+    min-width: 70px;
+}
+...
+
+4) 페이지 이동
+- DiaryItem.js
+import { useNavigate } from 'react-router-dom';
+import MyButton from "./MyButton";
+
+const DiaryItem = ({ id, emotion, content, date }) => {
+
+    // 페이지 이동
+    const navigate = useNavigate();
+
+    // PUBLIC_URL 작동 안할 경우 대비
+    const env = process.env;
+    env.PUBLIC_URL = env.PUBLIC_URL || '';
+
+    // 년.월.일 날짜 포맷 변환
+    const strDate = new Date(parseInt(date)).toLocaleDateString();
+
+    // 상세 페이지 이동
+    const goDetail = () => {
+        navigate(`/diary/${id}`);
+    };
+
+    // 수정 페이지 이동
+    const goEdit = () => {
+        navigate(`/edit/${id}`);
+    };
+
+    return (
+        <div className="DiaryItem">
+            <div className={['emotion_img_wrapper', `emotion_img_wrapper_${emotion}`].join(' ')} onClick={goDetail}>
+                <img src={process.env.PUBLIC_URL + `assets/emotion${emotion}.png`} />
+            </div>
+            <div className="info_wrapper" onClick={goDetail}>
+                <div className='diary_date'>{strDate}</div>
+                <div className='diary_content_preview'>{content.slice(0, 25)}</div>
+            </div>
+            <div className="btn_wrapper">
+                <MyButton text={'수정하기'} onClick={goEdit} />
+            </div>
+        </div>
+    );
+
+};
+
+export default DiaryItem;
+
+(일기 Home 페이지 구현)
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
