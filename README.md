@@ -74,5 +74,6 @@
     <a href="https://stbhg5.tistory.com/345">페이지 라우팅 2 - React Router 응용</a><br/>
     <a href="https://stbhg5.tistory.com/346">프로젝트 기초 공사 1</a><br/>
     <a href="https://stbhg5.tistory.com/347">프로젝트 기초 공사 2</a><br/>
+    <a href="https://stbhg5.tistory.com/348">페이지 구현 - 홈 (/)</a><br/>
     <br/>
     
