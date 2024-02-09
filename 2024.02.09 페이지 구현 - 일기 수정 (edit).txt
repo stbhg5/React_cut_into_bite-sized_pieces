@@ -1,0 +1,71 @@
+[2024.02.09 페이지 구현 - 일기 수정 (/edit)]
+
+/EDIT
+
+1. 일기 수정
+App 컴포넌트에서 일기 수정 페이지 라우팅을 확인한다. id 변수가 전달되도록 Path Variable 을 지정한다.
+
+- App.js
+...
+<BrowserRouter>
+    <div className="App">
+    <Routes>
+        <Route path='/' element={<Home />} />
+        <Route path='/new' element={<New />} />
+        <Route path='/edit/:id' element={<Edit />} />
+        <Route path='/diary/:id' element={<Diary />} />
+    </Routes>
+    </div>
+</BrowserRouter>
+...
+
+Edit 컴포넌트에서는 전달받은 id 를 통해 state context 로 공급되는 diary list 들을 가져와 id 에 해당하는 데이터를 출력한다. 데이터 출력은 컴포넌트가 마운트 되는 시점에 진행한다. 이후 수정할 데이터를 DiaryEditor 컴포넌트에 props 로 전달한다.
+
+- Edit.js
+import { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { DiaryStateContext } from "../App";
+import DiaryEditor from "../components/DiaryEditor";
+
+const Edit = () => {
+
+    // 페이지 이동 하는 함수를 반환. 매개변수로 경로 설정.
+    const navigate = useNavigate();
+
+    // 전달받아 들어오는 Path Variable 들을 모아서 객체로 반환
+    const { id } = useParams();
+
+    // state context
+    const diaryList = useContext(DiaryStateContext);
+
+    // 수정 데이터 state
+    const [originData, setOriginData] = useState();
+
+    // Mount 시점에 id, diaryList 가 변할 때만 꺼내온다.
+    useEffect(() => {
+        if (diaryList.length >= 1) {
+            const targetDiary = diaryList.find((it) => parseInt(it.id) === parseInt(id));
+            // Edit 페이지 잘못된 접근 막기
+            if (targetDiary) {
+                setOriginData(targetDiary);
+            } else { // id 잘 못 전달 되었을 때
+                navigate('/', { replace: true }); // Home 으로 보내며, 다시 잘못된 페이지로의 뒤로가기 못 하게 막음.
+            }
+        }
+    }, [id, diaryList]);
+
+    return (
+        <div>
+            {originData && <DiaryEditor isEdit={true} originData={originData} />}
+        </div>
+    );
+};
+
+export default Edit;
+
+DiaryEditor 컴포넌트에서 props 로 전달받은 originData 를 출력한다. 헤더도 Edit 컴포넌트에서 접근하여 렌더시 '일기 수정하기' 가 뜨도록 설정한다. 작성완료 버튼 클릭시 dispatch context 로 공급되는 onEdit 함수 가져와 호출하여 일기가 수정되도록 한다.
+
+(일기 수정 페이지)
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
