@@ -1,0 +1,345 @@
+[2024.02.10 페이지 구현 - 일기 상세 (/diary)]
+
+/DIARY
+
+1. 일기 상세
+일기 상세 페이지의 헤더, 오늘의 감정, 오늘의 일기를 구현한다.
+먼저 Diary 컴포넌트에서 state context 를 통해 일기 목록을 가져온다. 이후 일기 상세 데이터가 있을 때와 없을 때 분기하여 마크업을 진행한다. 일기 데이터가 없을 때 alert 를 추가한다(Edit 컴포넌트에도 적용).
+
+- Diary.js
+import { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { DiaryStateContext } from "../App";
+
+const Diary = () => {
+
+    // 사용자 정의 Hooks (커스텀 Hooks)
+    const { id } = useParams(); // 전달받아 들어오는 Path Variable 들을 모아서 객체로 반환
+
+    // state context
+    const diaryList = useContext(DiaryStateContext);
+
+    // 상세 데이터 state
+    const [data, setData] = useState();
+
+    // 페이지 이동 하는 함수를 반환. 매개변수로 경로 설정.
+    const navigate = useNavigate();
+
+    // Mount 시점에 id, diaryList 가 변할 때만 꺼내온다.
+    useEffect(() => {
+        if (diaryList.length >= 1) {
+            const targetDiary = diaryList.find((it) => parseInt(it.id) === parseInt(id));
+            console.log(targetDiary);
+            if (targetDiary) { // 일기가 존재할 때
+                setData(targetDiary);
+            } else { // 일기가 없을 때
+                alert('없는 일기입니다.');
+                navigate('/', { replace: true }); // Home 으로 보내며, 다시 잘못된 페이지로의 뒤로가기 못 하게 막음.
+            }
+        }
+    }, [id, diaryList]);
+
+    if (!data) {
+        return <div className="DiaryPage">로딩중입니다...</div>
+    } else {
+        return (
+            <div className="DiaryPage">
+                <h1>Diary</h1>
+                <p>이곳은 일기 상세 페이지 입니다.</p>
+            </div>
+        );
+    }
+    
+};
+
+export default Diary;
+
+1) 헤더
+헤더 가운데에서는 날짜를 YYYY-MM-DD 형식으로 가져와 출력하는데, 이전에 DiaryEditor 컴포넌트에서 사용했던 getStringDate 함수를 src\util\Date.js 파일을 만들어 분리하고, import 하여 사용한다(DiaryEditor 컴포넌트에도 적용).
+이후 '< 뒤로가기' 와 '수정하기' 버튼을 만들어 기능을 구현한다.
+
+- Diary.js
+import { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { DiaryStateContext } from "../App";
+import MyHeader from '../components/MyHeader';
+import MyButton from '../components/MyButton';
+import { getStringDate } from '../util/Date';
+
+const Diary = () => {
+
+    // 사용자 정의 Hooks (커스텀 Hooks)
+    const { id } = useParams(); // 전달받아 들어오는 Path Variable 들을 모아서 객체로 반환
+
+    // state context
+    const diaryList = useContext(DiaryStateContext);
+
+    // 상세 데이터 state
+    const [data, setData] = useState();
+
+    // 페이지 이동 하는 함수를 반환. 매개변수로 경로 설정.
+    const navigate = useNavigate();
+
+    // Mount 시점에 id, diaryList 가 변할 때만 꺼내온다.
+    useEffect(() => {
+        if (diaryList.length >= 1) {
+            const targetDiary = diaryList.find((it) => parseInt(it.id) === parseInt(id));
+            console.log(targetDiary);
+            if (targetDiary) { // 일기가 존재할 때
+                setData(targetDiary);
+            } else { // 일기가 없을 때
+                alert('없는 일기입니다.');
+                navigate('/', { replace: true }); // Home 으로 보내며, 다시 잘못된 페이지로의 뒤로가기 못 하게 막음.
+            }
+        }
+    }, [id, diaryList]);
+
+    if (!data) {
+        return <div className="DiaryPage">로딩중입니다...</div>
+    } else {
+        return (
+            <div className="DiaryPage">
+                <MyHeader
+                    headText={`${getStringDate(new Date(data.date))} 기록`}
+                    leftChild={<MyButton text={'< 뒤로가기'} onClick={() => navigate(-1)} />}
+                    rightChild={<MyButton text={'수정하기'} onClick={() => navigate(`/edit/${data.id}`)} />}
+                />
+            </div>
+        );
+    }
+    
+};
+
+export default Diary;
+
+2) 오늘의 감정
+일기 감정에 대한 정보가 있는 배열을 DiaryEditor 컴포넌트에서 src\util\Emotion.js 파일을 만들어 분리하고, import 하여 사용한다(DiaryEditor 컴포넌트에도 적용). 이후 마크업을 진행하는데, article 이라는 시맨틱 태그를 사용한다(div 태그와 같은 역할, article 태그 내부부터가 컨텐츠라는 것을 검색엔진에게 알림). 마크업을 진행하며 감정 데이터를 출력한다. 이후 스타일을 적용한다.
+
+- Diary.js
+import { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { DiaryStateContext } from "../App";
+import MyHeader from '../components/MyHeader';
+import MyButton from '../components/MyButton';
+import { getStringDate } from '../util/Date';
+import { emotionList } from '../util/Emotion';
+
+const Diary = () => {
+
+    // 사용자 정의 Hooks (커스텀 Hooks)
+    const { id } = useParams(); // 전달받아 들어오는 Path Variable 들을 모아서 객체로 반환
+
+    // state context
+    const diaryList = useContext(DiaryStateContext);
+
+    // 상세 데이터 state
+    const [data, setData] = useState();
+
+    // 페이지 이동 하는 함수를 반환. 매개변수로 경로 설정.
+    const navigate = useNavigate();
+
+    // Mount 시점에 id, diaryList 가 변할 때만 꺼내온다.
+    useEffect(() => {
+        if (diaryList.length >= 1) {
+            const targetDiary = diaryList.find((it) => parseInt(it.id) === parseInt(id));
+            // console.log(targetDiary);
+            if (targetDiary) { // 일기가 존재할 때
+                setData(targetDiary);
+            } else { // 일기가 없을 때
+                alert('없는 일기입니다.');
+                navigate('/', { replace: true }); // Home 으로 보내며, 다시 잘못된 페이지로의 뒤로가기 못 하게 막음.
+            }
+        }
+    }, [id, diaryList]);
+
+    if (!data) {
+        return <div className="DiaryPage">로딩중입니다...</div>
+    } else {
+        const curEmotionData = emotionList.find((it) => parseInt(it.emotion_id) === parseInt(data.emotion));
+        // console.log(curEmotionData);
+        return (
+            <div className="DiaryPage">
+                <MyHeader
+                    headText={`${getStringDate(new Date(data.date))} 기록`}
+                    leftChild={<MyButton text={'< 뒤로가기'} onClick={() => navigate(-1)} />}
+                    rightChild={<MyButton text={'수정하기'} onClick={() => navigate(`/edit/${data.id}`)} />}
+                />
+                <article>
+                    <section>
+                        <h4>오늘의 감정</h4>
+                        <div className={['diary_img_wrapper', `diary_img_wrapper_${data.emotion}`].join(' ')}>
+                            <img src={curEmotionData.emotion_img} />
+                            <div className='emotion_descript'>
+                                {curEmotionData.emotion_descript}
+                            </div>
+                        </div>
+                    </section>
+                </article>
+            </div>
+        );
+    }
+    
+};
+
+export default Diary;
+
+- App.css
+...
+/* Diary */
+.DiaryPage {
+
+}
+
+.DiaryPage section {
+    width: 100%;
+    margin-bottom: 100px;
+
+    display: flex;
+    flex-direction: column; /* 세로배치 */
+    align-items: center;
+    text-align: center;
+}
+
+.DiaryPage h4 {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.DiaryPage .diary_img_wrapper {
+    background-color: #ececec;
+    width: 250px;
+    height: 250px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column; /* 세로배치 */
+    align-items: center; /* 중앙에 아이템 맞춤 */
+    justify-content: space-around; /* 세로축 중심으로 적당히 가운데로 여백주며 모아줌 */
+}
+
+.DiaryPage .diary_img_wrapper_1 {
+    background-color: #64c964;
+}
+
+.DiaryPage .diary_img_wrapper_2 {
+    background-color: #9dd772;
+}
+
+.DiaryPage .diary_img_wrapper_3 {
+    background-color: #fdce17;
+}
+
+.DiaryPage .diary_img_wrapper_4 {
+    background-color: #fd8446;
+}
+
+.DiaryPage .diary_img_wrapper_5 {
+    background-color: #fd565f;
+}
+
+.DiaryPage .emotion_descript {
+    font-size: 25px;
+    color: white;
+}
+...
+
+3) 오늘의 일기
+마크업을 진행하며 일기 데이터를 출력한다. 이후 스타일을 적용한다.
+
+- Diary.js
+import { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { DiaryStateContext } from "../App";
+import MyHeader from '../components/MyHeader';
+import MyButton from '../components/MyButton';
+import { getStringDate } from '../util/Date';
+import { emotionList } from '../util/Emotion';
+
+const Diary = () => {
+
+    // 사용자 정의 Hooks (커스텀 Hooks)
+    const { id } = useParams(); // 전달받아 들어오는 Path Variable 들을 모아서 객체로 반환
+
+    // state context
+    const diaryList = useContext(DiaryStateContext);
+
+    // 상세 데이터 state
+    const [data, setData] = useState();
+
+    // 페이지 이동 하는 함수를 반환. 매개변수로 경로 설정.
+    const navigate = useNavigate();
+
+    // Mount 시점에 id, diaryList 가 변할 때만 꺼내온다.
+    useEffect(() => {
+        if (diaryList.length >= 1) {
+            const targetDiary = diaryList.find((it) => parseInt(it.id) === parseInt(id));
+            // console.log(targetDiary);
+            if (targetDiary) { // 일기가 존재할 때
+                setData(targetDiary);
+            } else { // 일기가 없을 때
+                alert('없는 일기입니다.');
+                navigate('/', { replace: true }); // Home 으로 보내며, 다시 잘못된 페이지로의 뒤로가기 못 하게 막음.
+            }
+        }
+    }, [id, diaryList]);
+
+    if (!data) {
+        return <div className="DiaryPage">로딩중입니다...</div>
+    } else {
+        const curEmotionData = emotionList.find((it) => parseInt(it.emotion_id) === parseInt(data.emotion));
+        // console.log(curEmotionData);
+        return (
+            <div className="DiaryPage">
+                <MyHeader
+                    headText={`${getStringDate(new Date(data.date))} 기록`}
+                    leftChild={<MyButton text={'< 뒤로가기'} onClick={() => navigate(-1)} />}
+                    rightChild={<MyButton text={'수정하기'} onClick={() => navigate(`/edit/${data.id}`)} />}
+                />
+                <article>
+                    <section>
+                        <h4>오늘의 감정</h4>
+                        <div className={['diary_img_wrapper', `diary_img_wrapper_${data.emotion}`].join(' ')}>
+                            <img src={curEmotionData.emotion_img} />
+                            <div className='emotion_descript'>
+                                {curEmotionData.emotion_descript}
+                            </div>
+                        </div>
+                    </section>
+                    <section>
+                        <h4>오늘의 일기</h4>
+                        <div className='diary_content_wrapper'>
+                            <p>{data.content}</p>
+                        </div>
+                    </section>
+                </article>
+            </div>
+        );
+    }
+    
+};
+
+export default Diary;
+
+- App.css
+...
+.DiaryPage .diary_content_wrapper {
+    width: 100%;
+    background-color: #e2e2e2;
+    border-radius: 5px;
+    word-break: keep-all; /* 텍스트가 길어져 줄을 바꿔야 하는 상황에, 단어 쪼개서 줄바꿈 방지 */
+    overflow-wrap: break-word; /* 텍스트 길이가 diary_content_wrapper 를 넘어갈 경우, 텍스트를 끊어 줄바꿈 강제함 */
+}
+
+.DiaryPage .diary_content_wrapper p {
+    padding: 20px;
+    text-align: left; /* 부모요소가 width 100% 갖지 못하면 left 가 안됨 */
+    font-size: 20px;
+    font-family: 'Yeon Sung';
+    font-weight: 400;
+    line-height: 2.5; /* 글자 높이 지정 */
+}
+...
+
+(일기 상세 페이지)
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
