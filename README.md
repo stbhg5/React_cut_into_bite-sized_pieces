@@ -78,5 +78,6 @@
     <a href="https://stbhg5.tistory.com/349">페이지 구현 - 일기쓰기 (/new)</a><br/>
     <a href="https://stbhg5.tistory.com/350">페이지 구현 - 일기 수정 (/edit)</a><br/>
     <a href="https://stbhg5.tistory.com/351">페이지 구현 - 일기 상세 (/diary)</a><br/>
+    <a href="https://stbhg5.tistory.com/352">(서브 챕터) 흔히 발생하는 버그 수정 하기</a><br/>
     <br/>
     
