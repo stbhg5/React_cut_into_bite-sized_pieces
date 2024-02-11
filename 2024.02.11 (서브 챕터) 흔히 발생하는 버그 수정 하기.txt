@@ -1,0 +1,203 @@
+[2024.02.11 (서브 챕터) 흔히 발생하는 버그 수정 하기]
+
+REACT 를 사용하면서 자주 만나볼 수 있는 버그들에 대한 대처방법
+
+1. key 값 중복
+버그 재현을 위해 2개의 일기를 작성한다. 개발자 도구 콘솔에 보면 Warning 이 뜨는 것을 확인할 수 있다.
+
+- 콘솔
+react-dom.development.js:86 Warning: Encountered two children with the same key, `1`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+
+2개의 자식이 똑같은 key 를 가졌다는 버그이다. App 컴포넌트에서 id 를 설정하는 useRef() 초기값을 0 으로 설정했기 때문이다. dummy data 의 데이터가 5개 이므로, 초기값을 6으로 설정한다.
+
+- App.js
+...
+// ID 설정
+const dataId = useRef(6);
+...
+
+2. 오타
+DiaryList 컴포넌트의 정렬 state 의 초기값이 'lastest' 로 설정된 부분을 'latest' 로 수정한다. 자바스크립트를 사용할 때는 항상 오타에 주의한다(오타를 막아주는 기능을 가진 타입스크립트도 있다).
+
+- App.js
+import React, { useReducer, useRef } from 'react';
+import './App.css';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Home from './pages/Home';
+import New from './pages/New';
+import Edit from './pages/Edit';
+import Diary from './pages/Diary';
+
+// state 처리
+const reducer = (state, action) => {
+  let newState = [];
+  switch (action.type) {
+    case 'INIT': {
+      return action.data;
+    }
+    case 'CREATE': {
+      /*
+      const newItem = {
+        ...action.data
+      };
+      newState = [newItem, ...state];
+      */
+      newState = [action.data, ...state];
+      break;
+    }
+    case 'REMOVE': {
+      newState = state.filter((it) => it.id !== action.targetId);
+      break;
+    }
+    case 'EDIT': {
+      newState = state.map((it) => it.id === action.data.id ? { ...action.data } : it);
+      break;
+    }
+    default:
+      return state;
+  }
+  return newState;
+}
+
+// state context
+export const DiaryStateContext = React.createContext();
+// dispatch context
+export const DiaryDispatchContext = React.createContext();
+
+// dummy data
+const dummyData = [
+  {
+    id: 1,
+    emotion: 1,
+    content: '오늘의 일기 1번',
+    date: '1707509600000' // new Date().getTime()
+  },
+  {
+    id: 2,
+    emotion: 2,
+    content: '오늘의 일기 2번',
+    date: '1707509600001' // new Date().getTime() + 1
+  },
+  {
+    id: 3,
+    emotion: 3,
+    content: '오늘의 일기 3번',
+    date: '1707509600002' // new Date().getTime() + 2
+  },
+  {
+    id: 4,
+    emotion: 4,
+    content: '오늘의 일기 4번',
+    date: '1707509600003' // new Date().getTime() + 3
+  },
+  {
+    id: 5,
+    emotion: 5,
+    content: '오늘의 일기 5번',
+    date: '1707509600004' // new Date().getTime() + 4
+  },
+  /*
+  {// 먼 미래
+    id: 6,
+    emotion: 2,
+    content: '오늘의 일기 6번',
+    date: 1807035077876
+  }
+  */
+];
+
+function App() {
+
+  // const [data, dispatch] = useReducer(reducer, []);
+  const [data, dispatch] = useReducer(reducer, dummyData);
+
+  // console.log(new Date().getTime() + 1);
+
+  // ID 설정
+  const dataId = useRef(6);
+
+  // CREATE
+  const onCreate = (date, content, emotion) => {
+    dispatch({
+      type: 'CREATE',
+      data: {
+        id: dataId.current,
+        date: new Date(date).getTime(),
+        content,
+        emotion
+      }
+    });
+    dataId.current += 1;
+  };
+
+  // REMOVE
+  const onRemove = (targetId) => {
+    dispatch({ type: 'REMOVE', targetId });
+  };
+
+  // EDIT
+  const onEdit = (targetId, date, content, emotion) => {
+    dispatch({
+      type: 'EDIT',
+      data: {
+        id: targetId,
+        date: new Date(date).getTime(),
+        content,
+        emotion
+      }
+    });
+  };
+
+  return (
+    <DiaryStateContext.Provider value={data}>
+      <DiaryDispatchContext.Provider
+        value={{
+          onCreate,
+          onRemove,
+          onEdit
+        }}
+      >
+        <BrowserRouter>
+          <div className="App">
+            <Routes>
+              <Route path='/' element={<Home />} />
+              <Route path='/new' element={<New />} />
+              <Route path='/edit/:id' element={<Edit />} />
+              <Route path='/diary/:id' element={<Diary />} />
+            </Routes>
+          </div>
+        </BrowserRouter>
+      </DiaryDispatchContext.Provider>
+    </DiaryStateContext.Provider>
+  );
+}
+
+export default App;
+
+- DiaryList.js
+...
+// 정렬 state
+const [sortType, setSortType] = useState('latest');
+...
+
+App 컴포넌트 dummy data 의 날짜를 특정 날짜로 고정했다.
+
+3. 달의 마지막 날짜로 일기 작성시 목록에서 안 보임
+새 일기작성시 해당 월의 마지막날 선택 후 일기 작성 완료 시, 목록에 일기가 출력되지 않으나 개발자 도구의 Reducer 에서는 새로 작성한 일기가 잘 들어와 있는 것을 볼 수 있다. Home 컴포넌트의 날짜를 필터링하는 useEffect 에서 마지막 날짜를 설정할 때, 0시 0분 0초가 아닌 그날의 끝시간인 23시 59분 59초로 설정한다.
+
+- Home.js
+...
+    // 받은 데이터 이번달 범위로 필터링
+    useEffect(() => {
+        if (diaryList.length >= 1) {
+            const firstDay = new Date(curDate.getFullYear(), curDate.getMonth(), 1).getTime(); // 이번년도 이번달 1일 밀리세컨즈
+            const lastDay = new Date(curDate.getFullYear(), curDate.getMonth() + 1, 0, 23, 59, 59).getTime(); // 이번년도 이번달 마지막일 밀리세컨즈
+            setData(diaryList.filter((it) => firstDay <= it.date && it.date <= lastDay));
+        }
+    }, [curDate, diaryList]); // diaryList 가 바뀌었다는건 일기가 추가, 수정, 삭제됨을 의미하므로 추가
+...
+
+자바스크립트에서 시간 객체를 사용하여 시간 비교시, 시, 분, 초까지 영향을 미친다.
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
