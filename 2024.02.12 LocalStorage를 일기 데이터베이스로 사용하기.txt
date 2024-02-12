@@ -1,0 +1,255 @@
+[2024.02.12 LocalStorage를 일기 데이터베이스로 사용하기]
+
+Web Database Storage
+
+버그는 아니지만 새로 작성한 일기는 새로고침하면 사라진다. 자바스크립트의 state 가 값은 유지되기 힘들다. 즉 휘발성 메모리다.
+이 때 간단한 데이터베이스 역할을 하는 Web Storage API 를 사용한다(브라우저에서 키/값 쌍을 쿠키보다 훨씬 직관적으로 저장할 수 있는 방법 제공). sessionStorage 와 localStorage 가 있는데, 브라우저가 꺼지더라도 데이터가 유지되는 localStorage 를 사용한다.
+
+참고링크 : https://developer.mozilla.org/ko/docs/Web/API/Web_Storage_API
+
+1. localStorage 실습
+- App.js
+...
+  // localStorage 실습
+  // Mount 시점
+  useEffect(() => {
+    localStorage.setItem('key', 10);
+  }, []);
+...
+
+(LocalStorage 저장 확인)
+
+자바스크립트 객체는 브라우저의 storage 가 받아들일 수 없는 값이기 때문에, 직렬화(객체를 문자열 형태로 바꿈)가 필요하다.
+
+- App.js
+...
+  // localStorage 실습
+  // Mount 시점
+  useEffect(() => {
+    localStorage.setItem('item1', 10);
+    localStorage.setItem('item2', '20');
+    localStorage.setItem('item3', JSON.stringify({ value: 30 }));
+  }, []);
+...
+
+(LocalStorage 저장 확인2)
+
+'key' 이름으로 저장한 값은 코드는 지웠지만 localStorage 에는 남아있는 것을 확인할 수 있다. localStorage 들어간 값은 브라우저의 storage 를 비우지 않는 이상 지워지지 않는다.
+localStorage 에 저장된 값을 꺼내본다.
+
+- App.js
+...
+  // localStorage 실습
+  // Mount 시점
+  useEffect(() => {
+    const item1 = localStorage.getItem('item1');
+    const item2 = localStorage.getItem('item2');
+    const item3 = localStorage.getItem('item3');
+    console.log({ item1, item2, item3 });
+  }, []);
+...
+
+(LocalStorage 저장된 값 꺼내기)
+
+'item1' key 에 저장된 값은 number 타입이었는데, 출력된 값은 문자열이다. 기본적으로 localStorage 에 들어가는 값들은 다 문자열로 바뀌어 들어간다. 따라서 저장소에 넣기 전 타입으로 형변환이 필요하다.
+
+- App.js
+...
+  // localStorage 실습
+  // Mount 시점
+  useEffect(() => {
+    const item1 = parseInt(localStorage.getItem('item1'));
+    const item2 = localStorage.getItem('item2');
+    const item3 = JSON.parse(localStorage.getItem('item3'));
+    console.log({ item1, item2, item3 });
+  }, []);
+...
+
+2. localStorage 에 일기데이터 저장
+기존의 dummy data 는 지우고 일기 data state 초기값을 빈 배열로 수정한다. 일기 데이터를 처리하는 reducer 에서 newState 가 변화할 때마다 localStorage 에 데이터를 넣어주면 된다.
+
+- App.js
+...
+// state 처리
+const reducer = (state, action) => {
+  let newState = [];
+  switch (action.type) {
+    case 'INIT': {
+      return action.data;
+    }
+    case 'CREATE': {
+      newState = [action.data, ...state];
+      break;
+    }
+    case 'REMOVE': {
+      newState = state.filter((it) => it.id !== action.targetId);
+      break;
+    }
+    case 'EDIT': {
+      newState = state.map((it) => it.id === action.data.id ? { ...action.data } : it);
+      break;
+    }
+    default:
+      return state;
+  }
+
+  localStorage.setItem('diary', JSON.stringify(newState));
+
+  return newState;
+};
+...
+
+새 일기를 작성하면 localStorage 에 일기 데이터가 저장되는 것을 볼 수 있다.
+DiaryEditor 컴포넌트에 일기 삭제하기 버튼을 헤더에 추가하여 일기 데이터 삭제를 구현한다.
+
+- DiaryEditor.js
+import { useContext, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import MyHeader from './MyHeader';
+import MyButton from './MyButton';
+import EmotionItem from './EmotionItem';
+import { DiaryDispatchContext } from '../App';
+import { getStringDate } from '../util/Date';
+import { emotionList } from '../util/Emotion';
+
+const DiaryEditor = ({ isEdit, originData} ) => {
+
+    // 페이지 이동
+    const navigate = useNavigate();
+
+    // 시간 state
+    const [date, setDate] = useState(getStringDate(new Date()));
+
+    // 감정 state
+    const [emotion, setEmotion] = useState(3);
+
+    // 감정 클릭시 실행되어 props 로 전달하는 함수
+    const handleClickEmote = (emotion) => {
+        setEmotion(emotion);
+    }
+
+    // 일기 state
+    const [content, setContent] = useState('');
+
+    // dispatch context 로 공급되는 onCreate 함수 가져오기
+    const { onCreate, onEdit, onRemove } = useContext(DiaryDispatchContext);
+
+    // 포커싱 위한 레퍼런스
+    const contentRef = useRef();
+
+    // 작성완료 버튼 클릭시 실행 함수
+    const handleSubmit = () => {
+        if (content.length < 1) {
+            contentRef.current.focus();
+            return;
+        }
+        if (window.confirm(isEdit ? '일기를 수정하시겠습니까?' : '새로운 일기를 작성하시겠습니까?')) {
+            if (!isEdit) {
+                onCreate(date, content, emotion);
+            } else {
+                onEdit(originData.id, date, content, emotion);
+            }
+        }  
+        navigate('/', { replace: true }); // 일기 작성페이지에서 뒤로가게 하여 못오게 막음
+    };
+
+    // 삭제하기 버튼 클릭시 실행 함수
+    const handleRemove = () => {
+        if (window.confirm('정말 삭제하시겠습니까?')) {
+            onRemove(originData.id);
+            navigate('/', { replace: true });
+        }
+    };
+    
+    // Mount 시점에 isEdit, originData 가 변할 때만 실행 (Edit 컴포넌트에서 랜더하는 DiaryEditor 에서만 실행)
+    useEffect(() => {
+        if (isEdit) {
+            // console.log(originData.date);
+            setDate(getStringDate(new Date(parseInt(originData.date))));
+            setEmotion(originData.emotion);
+            setContent(originData.content);
+        }
+    }, [isEdit, originData]);
+
+    return (
+        <div className='DiaryEditor'>
+            <MyHeader
+                headText={isEdit ? '일기 수정하기' : '새로운 일기 쓰기'}
+                leftChild={<MyButton text={'< 뒤로가기'} onClick={() => navigate(-1)} />}
+                rightChild={isEdit && (<MyButton text={'삭제하기'} type={'negative'} onClick={handleRemove} />)}
+            />
+            <div>
+                <section>
+                    <h4>오늘은 언제인가요?</h4>
+                    <div className='input_box'>
+                        <input
+                            className='input_date'
+                            type='date'
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                        />
+                    </div>
+                </section>
+                <section>
+                    <h4>오늘의 감정</h4>
+                    <div className='input_box emotion_list_wrapper'>
+                        {emotionList.map((it) => (
+                            <EmotionItem
+                                key={it.emotion_id}
+                                {...it}
+                                onClick={handleClickEmote}
+                                isSelected={it.emotion_id === emotion}
+                            />
+                        ))}
+                    </div>
+                </section>
+                <section>
+                    <h4>오늘의 일기</h4>
+                    <div className='input_box text_wrapper'>
+                        <textarea
+                            placeholder='오늘은 어땠나요?'
+                            ref={contentRef}
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                        />
+                    </div>
+                </section>
+                <section>
+                    <div className='control_box'>
+                        <MyButton text={'취소하기'} onClick={() => navigate(-1)} />
+                        <MyButton text={'작성완료'} type={'positive'} onClick={handleSubmit} />
+                    </div>
+                </section>
+            </div>
+        </div>
+    );
+
+}
+
+export default DiaryEditor;
+
+App 컴포넌트에서 Mount 시점에 localStorage 의 일기 데이터를 가져와 일기 data state 의 초기값으로 사용하도록 구현한다.
+
+- App.js
+...
+  // 일기 data state
+  const [data, dispatch] = useReducer(reducer, []);
+
+  // Mount 시점
+  useEffect(() => {
+    const localData =  localStorage.getItem('diary');
+    if (localData) {
+      const diaryList = JSON.parse(localData).sort((a, b) => parseInt(b.id) - parseInt(a.id)); // id 기준 내림차순 정렬
+      dataId.current = parseInt(diaryList[0].id) + 1;
+      dispatch({ type: 'INIT', data: diaryList });
+    }
+  }, []);
+
+  // ID 설정
+  const dataId = useRef(0);
+...
+
+(일기 데이터 LocalStorage 저장 확인)
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
