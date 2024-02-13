@@ -80,5 +80,6 @@
     <a href="https://stbhg5.tistory.com/351">페이지 구현 - 일기 상세 (/diary)</a><br/>
     <a href="https://stbhg5.tistory.com/352">(서브 챕터) 흔히 발생하는 버그 수정 하기</a><br/>
     <a href="https://stbhg5.tistory.com/353">LocalStorage를 일기 데이터베이스로 사용하기</a><br/>
+    <a href="https://stbhg5.tistory.com/354">프로젝트 최적화</a><br/>
     <br/>
     
