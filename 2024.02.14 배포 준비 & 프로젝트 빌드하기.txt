@@ -1,0 +1,247 @@
+[2024.02.14 배포 준비 & 프로젝트 빌드하기]
+
+DEPLOY1
+
+1. 프로젝트 타이틀 바꾸기
+head 태그 내의 title 태그에 프로젝트 타이틀이 있다. public\index.html 에서 수정한다.
+
+- index.html
+...
+<title>감정 일기장</title>
+...
+
+'React App' 에서 '감정 일기장'으로 수정한다.
+사이트의 성격을 설명할 수 있는 요약을 작성하는 부분도 수정한다. 'Web site created using create-react-app' 에서 '나만의 감정 일기장'으로 수정한다.
+
+- index.html
+...
+<meta
+  name="description"
+  content="나만의 감정 일기장"
+/>
+...
+
+마지막으로 언어를 'en' 에서 'ko' 로 수정한다.
+
+- index.html
+...
+<html lang="ko">
+...
+
+페이지마다 타이틀이 바뀌도록 수정한다. 먼저 상세 페이지(Diary 컴포넌트) 부터 수정한다.
+
+- Diary.js
+...
+    // 타이틀 변경
+    useEffect(() => {
+        const titleElement = document.getElementsByTagName('title')[0]; // 배열로 반환되면 첫 번째 값 가져옴
+        titleElement.innerHTML = `감정 일기장 - ${id}번 일기`;
+    }, []);
+...
+
+수정 페이지(Edit 컴포넌트)도 수정한다.
+
+- Edit.js
+...
+    // 타이틀 변경
+    useEffect(() => {
+        const titleElement = document.getElementsByTagName('title')[0]; // 배열로 반환되면 첫 번째 값 가져옴
+        titleElement.innerHTML = `감정 일기장 - ${id}번 일기 수정`;
+    }, []);
+...
+
+새 일기쓰기 페이지(New 컴포넌트)도 수정한다.
+
+- New.js
+...
+    // 타이틀 변경
+    useEffect(() => {
+        const titleElement = document.getElementsByTagName('title')[0]; // 배열로 반환되면 첫 번째 값 가져옴
+        titleElement.innerHTML = `감정 일기장 - 새 일기`;
+    }, []);
+...
+
+2. 프로젝트 아이콘 바꾸기
+public\favicon.ico 파일이 웹 브라우저의 아이콘이 된다. 수업 자료의 favicon.ico 파일로 교체한다.
+
+3. 빌드 & 배포
+필요한 파일들과 코드들을 압축하여 서버에 올려 배포하는 작업을 수행한다. package.json 에 명시된 build 명령어를 실행하면, 배포할 수 있는 파일로 활용할 압축된 파일을 얻을 수 있다.
+npm 종료 후 빌드 명령어를 수행한다.
+
+- 터미널
+npm run build
+    > emotion_diary@0.1.0 build
+    > react-scripts build
+
+    Creating an optimized production build...
+    One of your dependencies, babel-preset-react-app, is importing the
+    "@babel/plugin-proposal-private-property-in-object" package without
+    declaring it in its dependencies. This is currently working because
+    "@babel/plugin-proposal-private-property-in-object" is already in your
+    node_modules folder for unrelated reasons, but it may break at any time.
+
+    babel-preset-react-app is part of the create-react-app project, which
+    is not maintianed anymore. It is thus unlikely that this bug will
+    ever be fixed. Add "@babel/plugin-proposal-private-property-in-object" to
+    your devDependencies to work around this error. This will make this message
+    go away.
+
+    Compiled with warnings.
+
+    [eslint]
+    src\components\DiaryItem.js
+    Line 30:17:  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+
+    src\components\DiaryList.js
+    Line 1:17:  'useEffect' is defined but never used  no-unused-vars
+
+    src\components\EmotionItem.js
+    Line 9:13:  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+
+    src\pages\Diary.js
+    Line 27:8:   React Hook useEffect has a missing dependency: 'id'. Either include it or remove the dependency array        react-hooks/exhaustive-deps
+    Line 41:8:   React Hook useEffect has a missing dependency: 'navigate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+    Line 59:29:  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images    jsx-a11y/alt-text
+
+    src\pages\Edit.js
+    Line 24:8:  React Hook useEffect has a missing dependency: 'id'. Either include it or remove the dependency array        react-hooks/exhaustive-deps
+    Line 38:8:  React Hook useEffect has a missing dependency: 'navigate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+    Search for the keywords to learn more about each warning.
+    To ignore, add // eslint-disable-next-line to the line before.
+
+    File sizes after gzip:
+
+    54.6 kB  build\static\js\main.4b5422ca.js
+    1.23 kB  build\static\css\main.bd6ec56f.css
+
+    The project was built assuming it is hosted at /.
+    You can control this with the homepage field in your package.json.
+
+    The build folder is ready to be deployed.
+    You may serve it with a static server:
+
+    npm install -g serve
+    serve -s build
+
+    Find out more about deployment here:
+
+    https://cra.link/deployment
+
+프로젝트 크기에 따라서 빌드 시간이 상이하다.
+빌드가 완료되면 'The build folder is ready to be deployed.' 메시지가 뜨는데, 배포할 수 있는 파일로서 빌드 폴더가 준비되었다는 뜻이다. build 폴더가 만들어졌고 또 build 폴더의 index.html 를 확인하면, 띄어쓰기나 줄바꿈 없이 압축되어 있는 것을 확인할 수 있다. 이렇게 빌드가 되면 React 어플리케이션을 압축된 형태로 배포할 수 있도록 만들어준다.
+'serve -s build' 라는 명령어를 통해서 배포할 수 있다. 로컬에서 배포해 본다. 'serve' 라는 명령어를 사용하기 위해 npm global install 로 설치 후 배포한다. 즉, 'serve' 라는 빌드된 파일을 배포해줄 수 있는 기능을 갖는 패키지를 PC 에 전역으로 설치한다.
+
+- 터미널
+npm install -g serve
+    added 89 packages in 7s
+
+    24 packages are looking for funding
+    run `npm fund` for details
+
+이제 배포할 준비가 끝났다. 'serve -s build' 명령어를 통해서 빌드해서 만든 빌드 파일들을 배포한다.
+
+- 터미널
+serve -s build
+    serve : 이 시스템에서 스크립트를 실행할 수 없으므로 C:\Users\admin\AppData\Roaming\npm\serve.ps1 파일을 로드할 수 없습니다. 자세한 내용은 about_Execution_Policies(https://go.microsoft.com/fwlink/?LinkID=135170)를 참조하십시
+    오.
+    위치 줄:1 문자:1
+    + serve -s build
+    + ~~~~~
+        + CategoryInfo          : 보안 오류: (:) [], PSSecurityException
+        + FullyQualifiedErrorId : UnauthorizedAccess
+
+Windows PowerShell 을 관리자 권한으로 실행하여 문제를 해결한다.
+참고링크 : https://hellcoding.tistory.com/entry/VSCode-%EC%98%A4%EB%A5%98-%EC%9D%B4-%EC%8B%9C%EC%8A%A4%ED%85%9C%EC%97%90%EC%84%9C-%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8%EB%A5%BC-%EC%8B%A4%ED%96%89%ED%95%A0-%EC%88%98-%EC%97%86%EC%9C%BC%EB%AF%80%EB%A1%9C
+
+- PowerShell
+get-ExecutionPolicy
+    Restricted
+Set-ExecutionPolicy RemoteSigned
+    실행 규칙 변경
+    실행 정책은 신뢰하지 않는 스크립트로부터 사용자를 보호합니다. 실행 정책을 변경하면 about_Execution_Policies 도움말
+    항목(https://go.microsoft.com/fwlink/?LinkID=135170)에 설명된 보안 위험에 노출될 수 있습니다. 실행 정책을
+    변경하시겠습니까?
+    [Y] 예(Y)  [A] 모두 예(A)  [N] 아니요(N)  [L] 모두 아니요(L)  [S] 일시 중단(S)  [?] 도움말 (기본값은 "N"): Y
+get-ExecutionPolicy
+    RemoteSigned
+
+- 터미널
+serve -s build
+   ┌─────────────────────────────────────────┐
+   │                                         │
+   │   Serving!                              │
+   │                                         │
+   │   - Local:    http://localhost:3000     │
+   │   - Network:  http://172.30.1.15:3000   │
+   │                                         │
+   │   Copied local address to clipboard!    │
+   │                                         │
+   └─────────────────────────────────────────┘
+
+이후 http://localhost:3000/ 링크로 접속한다.
+일기가 접속되는데, 만약 일기가 나오지 않고 개발자도구 콘솔에 Uncaught TypeError 가 발생한다면 에러 내용을 확인하여 오류가 발생한 부분을 찾아간다.
+강의에서는 App 컴포넌트의 useEffect 를 'react' 에서 import 받지 않고 알 수 없는 경로를 통해 import 하여 오류가 발생한다(다른 경로의 import 는 개발환경, 즉 npm start 환경에서만 사용할 수 있는 경로). 'react' import 받도록 수정하고, 다른 모든 컴포넌트를 확인하며 잘 못 import 된 것은 없는지 확인한다.
+이후 다시 재빌드 후 배포한다. Ctrl + C 를 눌러 'serve -s build' 명령어로 실행된 것을 닫고 'npm run build' 명령어를 실행한 뒤, 'serve -s build' 명령어를 통해 다시 배포한다.
+
+프로젝트가 실행되고 모든 일기를 삭제하면, 빈 화면이 뜨며 개발자 도구 콘솔에 'TypeError: Cannot read properties of undefined (reading 'id')' 에러가 발생한다. App 컴포넌트의 에러가 난 부분을 살펴본다.
+
+- App.js
+...
+  // Mount 시점
+  useEffect(() => {
+    const localData = localStorage.getItem('diary');
+    if (localData) {
+      const diaryList = JSON.parse(localData).sort((a, b) => parseInt(b.id) - parseInt(a.id)); // id 기준 내림차순 정렬
+      dataId.current = parseInt(diaryList[0].id) + 1;
+      dispatch({ type: 'INIT', data: diaryList });
+    }
+  }, []);
+...
+
+빈 배열로 넘어온 localData 는 Truthy 하기 때문에 if 문 내부로 들어가 로직이 실행된다. 빈 배열의 0 번 인덱스의 id 를 꺼내오는데, 없는 인덱스에서 id 를 꺼내려고 하여 에러가 발생한 것이다. diaryList 의 길이가 1 이상일 때만 로직이 수행되도록 수정한다.
+
+- App.js
+...
+  // Mount 시점
+  useEffect(() => {
+    const localData = localStorage.getItem('diary');
+    if (localData) {
+      const diaryList = JSON.parse(localData).sort((a, b) => parseInt(b.id) - parseInt(a.id)); // id 기준 내림차순 정렬
+      if (diaryList.length >= 1) {
+        dataId.current = parseInt(diaryList[0].id) + 1;
+        dispatch({ type: 'INIT', data: diaryList });
+      }
+    }
+  }, []);
+...
+
+다시 재빌드 후 배포한다.
+
+- 터미널
+npm run build
+serve -s build
+
+프로젝트가 실행되고 개발자도구 콘솔창을 확인하면 에러가 사라진 것을 확인할 수 있다.
+새 일기를 작성한 뒤, 일기 목록을 보면 아직도 타이틀이 '감정 일기장 - 새 일기'로 되어있는 것을 볼 수 있다. 일기를 삭제하고 일기 목록을 보면 '감정 일기장 - 0번 일기 수정'으로 되어 있다.
+Home 컴포넌트에도 타이틀을 추가한다.
+
+- Home.js
+...
+    // 타이틀 변경
+    useEffect(() => {
+        const titleElement = document.getElementsByTagName('title')[0]; // 배열로 반환되면 첫 번째 값 가져옴
+        titleElement.innerHTML = `감정 일기장`;
+    }, []);
+...
+
+다시 재빌드 후 배포한다.
+
+- 터미널
+npm run build
+serve -s build
+
+프로젝트가 실행되고 일기를 작성하고 삭제시 일기 목록 타이틀이 정상적으로 출력되는 것을 확인할 수 있다.
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
