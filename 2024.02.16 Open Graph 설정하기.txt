@@ -1,0 +1,97 @@
+[2024.02.16 Open Graph 설정하기]
+
+Open Graph 라는 것은 meta 데이터에 해당하는 속성이다.
+
+1. Open Graph 설정
+(1) 썸네일 지정
+(2) 사이트 이름
+(3) 사이트 설명
+
+- index.html
+...
+    <meta property="og:image" content="%PUBLIC_URL%/thumbnail.png" />
+    <meta property="og:site_name" content="감정 일기장" />
+    <meta property="og:description" content="나만의 작은 감정 일기장" />
+...
+
+이후 빌드 후 배포한다.
+
+- CMD
+npm run build
+    > emotion_diary@0.1.0 build
+    > react-scripts build
+
+    Creating an optimized production build...
+    Compiled with warnings.
+
+    [eslint]
+    src\components\DiaryItem.js
+    Line 30:17:  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+
+    src\components\DiaryList.js
+    Line 1:17:  'useEffect' is defined but never used  no-unused-vars
+
+    src\components\EmotionItem.js
+    Line 9:13:  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+
+    src\pages\Diary.js
+    Line 27:8:   React Hook useEffect has a missing dependency: 'id'. Either include it or remove the dependency array        react-hooks/exhaustive-deps  
+    Line 41:8:   React Hook useEffect has a missing dependency: 'navigate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps  
+    Line 59:29:  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images    jsx-a11y/alt-text
+
+    src\pages\Edit.js
+    Line 24:8:  React Hook useEffect has a missing dependency: 'id'. Either include it or remove the dependency array        react-hooks/exhaustive-deps   
+    Line 38:8:  React Hook useEffect has a missing dependency: 'navigate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps   
+
+    Search for the keywords to learn more about each warning.
+    To ignore, add // eslint-disable-next-line to the line before.
+
+    File sizes after gzip:
+
+    54.61 kB  build\static\js\main.1f7a6815.js
+    1.23 kB   build\static\css\main.bd6ec56f.css
+
+    The project was built assuming it is hosted at /.
+    You can control this with the homepage field in your package.json.
+
+    The build folder is ready to be deployed.
+    You may serve it with a static server:
+
+    serve -s build
+
+    Find out more about deployment here:
+
+    https://cra.link/deployment
+
+firebase deploy
+    === Deploying to 'jint-react-project'...
+
+    i  deploying hosting
+    i  hosting[jint-react-project]: beginning deploy...
+    i  hosting[jint-react-project]: found 18 files in build
+    +  hosting[jint-react-project]: file upload complete
+    i  hosting[jint-react-project]: finalizing version...
+    +  hosting[jint-react-project]: version finalized
+    i  hosting[jint-react-project]: releasing new version...
+    +  hosting[jint-react-project]: release complete
+
+    +  Deploy complete!
+
+    Project Console: https://console.firebase.google.com/project/jint-react-project/overview
+    Hosting URL: https://jint-react-project.web.app
+
+이후 호스팅 URL 을 카카오톡 톡방에 공유한다. 아직 적용이 안된 상태로 보이는데, 카카오톡 서비스에서도 Open Graph 데이터들을 링크가 공유될 때마다 가져오는게 아닌, 한 번 가져오면 캐시처럼 보관해놨다가 쓰게 되기 때문이다.
+이대로 가만히 냅두면 아예 적용이 되지 않을 수 있기 때문에, 제대로된 적용을 위해 구글에 '카카오 개발자'를 검색하여 Kakao Developers 홈페이지에 접속한다.
+
+참고링크 : https://developers.kakao.com/
+
+이후 '도구' 메뉴를 클릭하여 접속하고 '초기화 도구'의 '도구 바로가기'를 클릭한다(2021년 기준). 회원가입을 진행하고 카카오 계정으로 로그인한다.
+지금은 '도구' 메뉴의 '디버거 도구' 에 접속하여 '공유 디버거' 에서 URL 을 설정한다. 호스팅 URL 을 입력 후 '캐시 초기화'를 누르고 '디버그'를 누른다.
+이후 다시 호스팅 URL 을 카카오톡 톡방에 공유한다.
+
+(프로젝트 URL 카카오톡 공유)
+
+최종 프로젝트 링크 : https://jint-react-project.web.app/
+
+
+참고강의 : https://www.inflearn.com/course/%ED%95%9C%EC%9E%85-%EB%A6%AC%EC%95%A1%ED%8A%B8#
